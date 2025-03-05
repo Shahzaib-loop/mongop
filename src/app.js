@@ -1,13 +1,33 @@
 const createError = require('http-errors')
-const express = require("express");
-const app = express();
-const cors = require("cors");
-const morgan = require("morgan");
+const express = require("express")
+const app = express()
+const cors = require("cors")
+const morgan = require("morgan")
+const logger = require('./utils/logger')
+const responseHandler = require('./utils/responseHandler')
 
-app.use(cors());
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors())
+app.use(morgan("dev"))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+app.use((req, res, next) => {
+  const start = Date.now()
+
+  res.on("finish", () => {
+    const responseTime = Date.now() - start
+
+    logger.http({
+      message: "Incoming request",
+      method: req.method,
+      url: req.originalUrl,
+      status: res.statusCode,
+      responseTime,
+    })
+  })
+
+  next()
+})
 
 const indexRouter = require('./routes/index')
 

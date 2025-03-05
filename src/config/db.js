@@ -3,19 +3,25 @@ const path = require('path')
 const fs = require('fs')
 const basename = path.basename(__filename)
 const mongoose = require('mongoose')
+const logger = require('../utils/logger')
 
-// const { mysql, mysql2, mongoDB } = require('../../config')
+const { mysql, mysql2, mongoDB } = require('./config')
 
-mongoose.connect(
-  `mongodb://localhost:27017/institute`,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-  })
-  .then(() => console.log("MongoDB Connected!"))
-  .catch(error => console.log('Cannot Connect To Mongo Database!', error))
-mongoose.set('useCreateIndex', true)
+const uri = `mongodb://${ mongoDB.hostname }:${ mongoDB.port }/${ mongoDB.database }`
+
+async function connectDB() {
+  try {
+    await mongoose.connect(uri)
+    logger.info("MongoDB connected successfully")
+  }
+  catch (error) {
+    logger.error(`MongoDB connection Error: ${ error }`)
+    process.exit(1)
+  }
+}
+
+module.exports = connectDB
+
 
 // const sequelize = new Sequelize(mysql.database, mysql.username, mysql.password, {
 //   host: mysql.hostname,
@@ -76,5 +82,3 @@ const db = {}
 
 // db.sequelize = sequelize
 // db.sequelize2 = sequelize2
-
-module.exports = db

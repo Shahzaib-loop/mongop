@@ -1,11 +1,14 @@
 require("dotenv").config()
 const debug = require('debug')('nodeP:server')
 const app = require('../src/app')
-require('./models/index')
+const logger = require('../src/utils/logger')
+const connectMongoDB = require('./config/db')
+
+connectMongoDB()
 
 const PORT = normalizePort('5000')
 
-app.listen(PORT, () => console.log(`I'm Listening on`, PORT))
+app.listen(PORT, () => logger.info(`I'm Listening on ${ PORT }`))
 app.on('error', onError)
 app.on('listening', onListening)
 

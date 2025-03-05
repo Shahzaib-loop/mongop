@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-// const mongoosePaginate = require('mongoose-paginate-v2');
+// const mongoosePaginate = require('mongoose-paginate-v2')
 
 const trainerSchema = new mongoose.Schema({
-  fname: {
+  firstName: {
     type: String,
     default: false
   },
-  lname: {
+  lastName: {
     type: String,
     default: false
   },
@@ -15,6 +15,23 @@ const trainerSchema = new mongoose.Schema({
     type: Number,
     default: false
   },
+  weight: {
+    type: Number,
+    default: false
+  },
+  medicalCondition: {
+    type: String,
+    default: false
+  },
+  height: {
+    type: Number,
+    default: false
+  },
+  job: {
+    type: String,
+    default: false
+  },
+
 }, {
   timestamps: true
 })
@@ -25,5 +42,5 @@ trainerSchema.index({
 })
 // trainerSchema.paginate({}, { page: 1, limit: 10 })
 
-const Trainer = mongoose.model('trainers', trainerSchema);
+const Trainer = mongoose.model('trainers', trainerSchema)
 module.exports = Trainer
