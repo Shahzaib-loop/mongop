@@ -1,12 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const Trainer = require('../models/trainer')
+const logger = require('../utils/logger')
+const authMiddleware = require('../middlewares/authMiddleware')
 
 router.get('/', (req, res, next) => {
   res.json({ title: 'Express', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-router.post('/data', async (req, res) => {
+router.post('/data', authMiddleware, async (req, res) => {
   let { fname, lname, age, } = req.body
 
   console.log(req.body, "reqreqreqreq")

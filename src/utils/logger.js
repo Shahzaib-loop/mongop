@@ -11,22 +11,24 @@ const colors = {
 
 winston.addColors(colors)
 
-const logFormat = winston.format.printf(({ timestamp, level, message, method = "---" }) => {
-  const formattedTime = moment(timestamp).format("YYYY-MM-DD HH:mm:ss.SSS Z");
-  return `${ method } | ${ formattedTime } | ${ level.toUpperCase() }: ${ message }`;
-});
-
 const logger = winston.createLogger({
   level: "debug",
   format: winston.format.combine(
     // winston.format.colorize({ all: true }),
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp = 0, level = 'unknown', message = 'default message', method = '---' }) =>
-      `${ method } | ${ moment(timestamp).format("YYYY-MM-DD HH:mm:ss.SSS Z") } | ${ level.toUpperCase() }: ${ message }`
+    winston.format.printf(({
+                             timestamp = 0,
+                             level = 'unknown',
+                             message = 'default message',
+                             method = '---',
+                             url = '---',
+                             status = '---',
+                             responseTime = 0,
+                           }) =>
+      `${ method } ${ url } ${ status } ${ responseTime } ms | ${ moment(timestamp).format("DD-MM-YYYY HH:mm:ss.SSS Z") } | ${ level.toUpperCase() }: ${ message }`
     )
   ),
-  transports:
-    [
+  transports: [
       new winston.transports.Console(),
       new winston.transports.File({ filename: "logs/http.log", level: "http" }),
       new winston.transports.File({ filename: "logs/error.log", level: "error" }),

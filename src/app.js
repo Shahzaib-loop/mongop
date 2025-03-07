@@ -12,10 +12,11 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use((req, res, next) => {
-  const start = Date.now()
+  const start = process.hrtime()
 
   res.on("finish", () => {
-    const responseTime = Date.now() - start
+    const diff = process.hrtime(start)
+    const responseTime = (diff[0] * 1000 + diff[1] / 1e6).toFixed(4)
 
     logger.http({
       message: "Incoming request",
