@@ -2,9 +2,18 @@ require("dotenv").config()
 const debug = require('debug')('nodeP:server')
 const app = require('../src/app')
 const logger = require('../src/utils/logger')
-const connectMongoDB = require('./config/db')
+const { connectDB, pool, } = require('./config/db')
 
-connectMongoDB()
+connectDB()
+
+app.get("/", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW()");
+    res.json({ message: "PostgreSQL connected!", time: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 const PORT = normalizePort('5000')
 

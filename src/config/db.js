@@ -4,6 +4,7 @@ const fs = require('fs')
 const basename = path.basename(__filename)
 const mongoose = require('mongoose')
 const logger = require('../utils/logger')
+const { Pool } = require("pg")
 
 const { mysql, mysql2, mongoDB } = require('./config')
 
@@ -20,7 +21,21 @@ async function connectDB() {
   }
 }
 
-module.exports = connectDB
+const pool = new Pool({
+  host: process.env.PGHOST,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  port: process.env.PGPORT,
+})
+
+pool.connect()
+  .then(() => console.log("Connected to PostgreSQL"))
+  .catch((err) => console.error("Connection error", err))
+
+module.exports = { connectDB, pool }
+
+
 
 
 // const sequelize = new Sequelize(mysql.database, mysql.username, mysql.password, {
