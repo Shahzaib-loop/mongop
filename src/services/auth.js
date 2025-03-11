@@ -1,59 +1,67 @@
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
-const Admin = require("../models/Admin")
+const Admin = require("../models/admin")
 const logger = require("../utils/logger")
 
-// Generate Access & Refresh Tokens
+// Generate Tokens
 const generateTokens = (user) => {
-  const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "15m" })
-  const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_SECRET, { expiresIn: "7d" })
+    const {_id = '', role = 'admin'} = user
+    console.log(process.env.JWT_SECRET,"vprocess.env.JWT_SECRETprocess.env.JWT_SECRET")
 
-  return { accessToken, refreshToken }
+    const accessToken = jwt.sign({id: _id, role}, process.env.JWT_SECRET, {expiresIn: "15m"})
+    const refreshToken = jwt.sign({id: _id}, process.env.REFRESH_SECRET, {expiresIn: "7d"})
+
+    console.log(accessToken);
+    console.log(refreshToken);
+
+    return {accessToken, refreshToken}
 }
 
-// Admin Registration
-const registerUser = async ({ name, email, password }) => {
-  // Check if user already exists
-  let user = await Admin.findOne({ email })
-  if (user) throw new Error("Admin already exists")
+// Register Admin and Return Tokens
+const registerUser = async ({firstName, lastName, email, password}) => {
+    let user = await Admin.findOne({email})
+    if (user) throw new Error("Admin already exists")
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10)
-  user = new Admin({ name, email, password: hashedPassword })
+    console.log(user, "user 11 useruseruseruser")
 
-  // Save user to DB
-  await user.save()
-  logger.info({ message: "Admin registered successfully", email })
+    const hashedPassword = await bcrypt.hash(password, 10)
+    user = new Admin({firstName, lastName, email, password: hashedPassword})
 
-  return { message: "Admin registered successfully" }
+    console.log(user, "user 22 useruseruseruser")
+
+    await user.save()
+    logger.info({message: "Admin registered successfully", email})
+
+    // Generate tokens after successful registration
+    return generateTokens(user)
 }
 
 // Admin Login
-const loginUser = async (email, password) => {
-  const user = await Admin.findOne({ email })
+const loginUser = async ({email, password}) => {
+    const user = await Admin.findOne({email})
+    if (!user) throw new Error("Invalid email or password")
 
-  if (!user) throw new Error("Admin not found")
-  
-  const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) throw new Error("Invalid email or password")
 
-  if (!isMatch) throw new Error("Invalid credentials")
+    const tokens = generateTokens(user)
+    logger.info({message: "Admin logged in", email})
 
-  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1d" })
-
-  return { token, user }
+    return tokens
 }
 
-// Verify Refresh Token and Issue New Access Token
+// Refresh Token Service
 const refreshTokenService = async (refreshToken) => {
-  if (!refreshToken) throw new Error("No refresh token provided")
+    if (!refreshToken) {
+        throw new Error("No refresh token provided")
+    }
 
-  try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET)
-    return generateTokens({ id: decoded.id })
-  }
-  catch (error) {
-    throw new Error("Invalid or expired refresh token")
-  }
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET)
+        return generateTokens({id: decoded.id})
+    } catch (error) {
+        throw new Error("Invalid or expired refresh token")
+    }
 }
 
-module.exports = { registerUser, loginUser, refreshTokenService }
+module.exports = {registerUser, loginUser, refreshTokenService}

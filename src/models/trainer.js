@@ -1,46 +1,53 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 
-// const mongoosePaginate = require('mongoose-paginate-v2')
-
-const trainerSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    default: false
-  },
-  lastName: {
-    type: String,
-    default: false
-  },
-  age: {
-    type: Number,
-    default: false
-  },
-  weight: {
-    type: Number,
-    default: false
-  },
-  medicalCondition: {
-    type: String,
-    default: false
-  },
-  height: {
-    type: Number,
-    default: false
-  },
-  job: {
-    type: String,
-    default: false
-  },
-
+const TrainerSchema = new mongoose.Schema({
+    firstName: {
+        type: String,
+    },
+    lastName: {
+        type: String,
+    },
+    email: {
+        type: String,
+        unique: true,
+    },
+    phone: {
+        type: String,
+    },
+    password: {
+        type: String,
+    },
+    gym: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Gym",
+    },
+    trainees: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Trainee",
+    }],
+    schedule: [{
+        day: String,
+        startTime: String,
+        endTime: String,
+    }],
+    rating: { // Average rating from trainees
+        type: Number,
+        default: 0,
+    },
+    token: {
+        type: String,
+    },
+    refresh_token: {
+        type: String,
+    },
 }, {
-  timestamps: true
+    timestamps: true,
 })
 
-trainerSchema.index({
-  fname: 'text',
-  lname: 'text',
-})
-// trainerSchema.paginate({}, { page: 1, limit: 10 })
 
-const Trainer = mongoose.model('trainers', trainerSchema)
-module.exports = Trainer
+TrainerSchema.index({
+    firstName: 'text',
+    lastName: 'text',
+})
+
+module.exports = mongoose.model("Trainer", TrainerSchema)

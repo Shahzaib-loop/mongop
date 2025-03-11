@@ -6,21 +6,14 @@ const { verifyToken, } = require('../middlewares/authentication')
 
 const router = express.Router()
 
-console.log('tttttttttt')
-
-router.post('/', (req, res) => {
-  return res.status(201).json({ testing: 'Testing Auth Routes' })
-})
 router.post('/data', dataTest)
 
 router.post("/register", register)
-
 router.post("/admin/login", login)
+router.post("/refresh-token", refreshToken)
 
-router.get("/user/", verifyRole(["admin"]), (req, res) => {
+router.get("/user/", verifyToken,verifyRole(["admin"]), (req, res) => {
   console.log('get user')
 })
-
-router.post("/refresh-token", refreshToken)
 
 module.exports = router

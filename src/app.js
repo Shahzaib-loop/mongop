@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use((req, res, next) => {
   const start = process.hrtime()
 
-  res.on("finish", () => {
+  res.on("start", () => {
     const diff = process.hrtime(start)
     const responseTime = (diff[0] * 1000 + diff[1] / 1e6).toFixed(4)
 
