@@ -1,15 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const Trainer = require('../models/trainer')
-const logger = require('../utils/logger')
-const {authMiddleware} = require('../middlewares/authMiddleware')
-const {dataTest} = require('../services')
+const authRouter = require('./auth')
 
-// router.post('/data', authMiddleware, dataTest)
+// router.post('/data', verifyToken , dataTest)
 router.get('/', (req, res, next) => {
-    res.json({title: 'Express', Message: `I'm listening on ${process.env.PORT}`})
+  res.json({ title: 'Express', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-router.post('/data', dataTest)
+router.use('/auth', authRouter)
+// router.use('/admin', adminRouter)
+// router.use('/user', userRouter)
 
 module.exports = router
