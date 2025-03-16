@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const authRouter = require('./auth')
+const adminRouter = require('./admin')
 
 router.get('/', (req, res, next) => {
-  res.json({ title: 'Express', Message: `I'm listening on ${ process.env.PORT }` })
+  res.json({ title: 'Router', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-router.use('/auth', authRouter)
+router.use('/admin', adminRouter)
 // router.use('/admin', adminRouter)
 // router.use('/user', userRouter)
 

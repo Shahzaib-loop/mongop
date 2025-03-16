@@ -1,5 +1,5 @@
-const {registerUser, loginUser, refreshTokenService} = require("../services/auth")
-const logger = require("../utils/logger")
+const {registerUser, loginUser, refreshTokenService} = require("../../services/auth")
+const logger = require("../../utils/logger")
 
 const register = async (req, res) => {
     try {

@@ -13,7 +13,7 @@ router.post("/admin/login", login)
 router.post("/refresh-token", refreshToken)
 
 router.get("/user/", verifyToken,verifyRole(["admin"]), (req, res) => {
-  console.log('get user')
+    console.log('get user')
 })
 
 module.exports = router
