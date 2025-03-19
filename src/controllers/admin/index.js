@@ -14,15 +14,8 @@ const refreshToken = async (req, res) => {
 
 const adminRegister = async (req, res) => {
   try {
-    console.log(req.body, "reqqqqqqqqqqqqq")
-
     const user = await registerUser(req.body)
-
-    console.log(user, 'user userrrrrrr')
-
-    const tokens = loginUser(req.body)
-
-    console.log(tokens, 'tokens userrrrrrr')
+    const tokens = await loginUser(req.body)
 
     res.status(201).json({ message: "User registered successfully", tokens })
   }
