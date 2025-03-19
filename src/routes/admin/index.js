@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {adminRegister, adminLogin, adminLogout, adminData} = require('../../controllers/admin')
 
-router.get('/', (req, res, next) => {
+router.get('/listen', (req, res, next) => {
     res.json({title: 'Admin', Message: `I'm listening on ${process.env.PORT}`})
 })
 

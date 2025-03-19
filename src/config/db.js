@@ -4,58 +4,54 @@ const fs = require('fs')
 const basename = path.basename(__filename)
 const mongoose = require('mongoose')
 const logger = require('../utils/logger')
-const {mongoDB, pgdb,} = require('./config')
-const {Pool,} = require("pg")
+const { mongoDB, pgdb, } = require('./config')
+const { Pool, } = require("pg")
 
-const uri = `mongodb://${mongoDB.hostname}:${mongoDB.port}/${mongoDB.database}`
+const uri = `mongodb://${ mongoDB.hostname }:${ mongoDB.port }/${ mongoDB.database }`
 
 async function connectDB() {
-    try {
-        await mongoose.connect(uri)
-        logger.info("MongoDB Connected Successfully")
-    } catch (error) {
-        logger.error(`MongoDB connection Error: ${error}`)
-        process.exit(1)
-    }
+  try {
+    // await mongoose.connect(uri)
+    // logger.info("MongoDB Connected Successfully")
+  }
+  catch (error) {
+    // logger.error(`MongoDB connection Error: ${error}`)
+    // process.exit(1)
+  }
 }
 
 const pool = new Pool({
-    user: pgdb.user,
-    password: pgdb.password,
-    host: pgdb.host,
-    database: pgdb.database,
-    port: pgdb.port,
-    pool: {
-        max: Number(pgdb.max) || 10,
-        min: Number(pgdb.max) || 1,
-        acquire: 30000,
-        idle: 10000,
-    },
+  user: pgdb.user,
+  password: pgdb.password,
+  host: pgdb.host,
+  database: pgdb.database,
+  port: pgdb.port,
+  pool: {
+    max: Number(pgdb.max) || 10,
+    min: Number(pgdb.max) || 1,
+    acquire: 30000,
+    idle: 10000,
+  },
 })
-
-pool.connect()
-    .then(() => logger.info("PostgreSQL Connected Successfully"))
-    .catch(err => logger.error(`PostgreSQL connection Error: ${err}`))
-
-module.exports = {connectDB, pool}
-
-// const sequelize = new Sequelize(pgdb.database, 'postgres', pgdb.password, {
-//     host: pgdb.host,
-//     dialect: 'postgres',
-//     logging: false,
 //
-//     pool: {
-//         max: Number(pgdb.max) || 10,
-//         min: Number(pgdb.max) || 1,
-//         acquire: 30000,
-//         idle: 10000,
-//     },
-// })
-// sequelize
-//     .authenticate()
+// pool.connect()
 //     .then(() => logger.info("PostgreSQL Connected Successfully"))
 //     .catch(err => logger.error(`PostgreSQL connection Error: ${err}`))
 
+const sequelize = new Sequelize(pgdb.database, 'postgres', pgdb.password, {
+  host: pgdb.host,
+  dialect: 'postgres',
+  logging: false,
+
+  pool: {
+    max: Number(pgdb.max) || 10,
+    min: Number(pgdb.max) || 1,
+    acquire: 30000,
+    idle: 10000,
+  },
+})
+
+module.exports = { connectDB, sequelize, pool }
 
 
 // const sequelize2 = new Sequelize(mysql2.database, mysql2.username, mysql2.password, {
