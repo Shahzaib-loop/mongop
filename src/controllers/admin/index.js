@@ -1,58 +1,99 @@
-const { refreshTokenService, registerUser, loginUser, logoutUser, adminsData, } = require("../../services/admin")
 const logger = require("../../utils/logger")
-
-const refreshToken = async (req, res) => {
-  try {
-    const { refreshToken } = req.body
-    const tokens = await refreshTokenService(refreshToken)
-    res.json(tokens)
-  }
-  catch (error) {
-    res.status(400).json({ error: error.message })
-  }
-}
+const responseHandler = require("../../utils/responseHandler")
+const {
+  registerAdmin,
+  loginAdmin,
+  logoutAdmin,
+  getAdmins,
+  getAdmin,
+  updateAdmin,
+  deleteAdmin,
+} = require("../../services/admin")
 
 const adminRegister = async (req, res) => {
   try {
-    const user = await registerUser(req.body)
-    const tokens = await loginUser(req.body)
+    const user = await registerAdmin(req.body)
 
-    res.status(201).json({ message: "User registered successfully", tokens })
+    responseHandler.created(res, "Admin registered successfully", user)
   }
   catch (error) {
     logger.info(`${ error }`)
-    res.status(400).json({ error: error.message })
+    responseHandler.error(res, error.message, 500, error,)
   }
 }
 
 const adminLogin = async (req, res) => {
   try {
-    const tokens = await loginUser(req.body)
-    res.json(tokens)
+    const tokens = await loginAdmin(req.body)
+
+    responseHandler.success(res, "Admin login successfully", tokens)
   }
   catch (error) {
-    res.status(400).json({ error: error.message })
+    responseHandler.error(res, error.message, 400, error,)
   }
 }
 
 const adminLogout = async (req, res) => {
   try {
-    const tokens = await logoutUser(req.body)
-    res.json(tokens)
+    const tokens = await logoutAdmin(req.body)
+
+    responseHandler.success(res, "Admin logout successfully", tokens)
   }
   catch (error) {
-    res.status(400).json({ error: error.message })
+    responseHandler.error(res, error.message, 400, error,)
+  }
+}
+
+const adminsData = async (req, res) => {
+  try {
+    const data = await getAdmins()
+
+    responseHandler.success(res, "Admins Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
   }
 }
 
 const adminData = async (req, res) => {
   try {
-    const data = await adminsData()
-    res.json(data)
+    const data = await getAdmin()
+
+    responseHandler.success(res, "Admin Data Fetched successfully", data)
   }
   catch (error) {
-    res.status(400).json({ error: error.message })
+    responseHandler.error(res, error.message, 400, error,)
   }
 }
 
-module.exports = { refreshToken, adminRegister, adminLogin, adminLogout, adminData, }
+const adminUpdate = async (req, res) => {
+  try {
+    const data = await updateAdmin()
+
+    responseHandler.success(res, "Admins Updated successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
+}
+
+const adminDelete = async (req, res) => {
+  try {
+    const data = await deleteAdmin()
+
+    responseHandler.success(res, "Admins Deleted successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
+}
+
+module.exports = {
+  adminRegister,
+  adminLogin,
+  adminLogout,
+  adminsData,
+  adminData,
+  adminUpdate,
+  adminDelete,
+}

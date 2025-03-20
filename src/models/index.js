@@ -1,12 +1,16 @@
 const { sequelize } = require("../config/db")
-const Admin = require("./admin")
-const Trainer = require("./trainer")
 const logger = require("../utils/logger")
+const Admin = require("./admin")
+const Gym = require("./gym")
+const Trainer = require("./trainer")
+const Trainee = require("./trainee")
 
 const db = {}
 db.sequelize = sequelize
 db.Admin = Admin
-db.Trainer = Trainer;
+db.Gym = Gym
+db.Trainer = Trainer
+db.Trainee = Trainee;
 
 (async () => {
   try {
@@ -15,8 +19,9 @@ db.Trainer = Trainer;
 
     await sequelize.sync()
     logger.info("Tables synced!")
-  } catch (err) {
-    logger.error(`PostgreSQL connection Error: ${err}`)
+  }
+  catch (err) {
+    logger.error(`PostgreSQL connection Error: ${ err }`)
   }
 })()
 

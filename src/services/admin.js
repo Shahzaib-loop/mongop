@@ -1,22 +1,8 @@
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
-const logger = require("../utils/logger")
 const db = require("../models")
+const logger = require("../utils/logger")
 const Admin = db.sequelize.model('Admin');
-
-const refreshTokenService = async (refreshToken) => {
-  if (!refreshToken) {
-    throw new Error("No refresh token provided")
-  }
-
-  try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET)
-    return generateTokens({ id: decoded.id })
-  }
-  catch (error) {
-    throw new Error("Invalid or expired refresh token")
-  }
-}
 
 const generateTokens = (user) => {
   const { _id = '', role = 'admin' } = user
@@ -27,7 +13,7 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken }
 }
 
-const registerUser = async ({ firstName = '', lastName = '', email = '', password = '' }) => {
+const registerAdmin = async ({ firstName = '', lastName = '', email = '', password = '' }) => {
   let user = await Admin.findOne({ where: { email } });
 
   if (user) throw new Error("Admin already exists")
@@ -41,7 +27,7 @@ const registerUser = async ({ firstName = '', lastName = '', email = '', passwor
   return generateTokens(user)
 }
 
-const loginUser = async ({ email, password }) => {
+const loginAdmin = async ({ email = '', password = '' }) => {
   const user = await Admin.findOne({ email })
   if (!user) throw new Error("Invalid email or password")
 
@@ -55,7 +41,7 @@ const loginUser = async ({ email, password }) => {
   return tokens
 }
 
-const logoutUser = async (email) => {
+const logoutAdmin = async (email = '') => {
   const user = await Admin.findOne({ email })
   if (!user) throw new Error("Invalid email or password")
 
@@ -68,7 +54,7 @@ const logoutUser = async (email) => {
   return tokens
 }
 
-const adminsData = async () => {
+const getAdmins = async () => {
   try {
     return Admin.findAll()
   }
@@ -77,5 +63,37 @@ const adminsData = async () => {
   }
 }
 
+const getAdmin = async () => {
+  try {
+    return Admin.findAll()
+  }
+  catch (err) {
+    logger.error({ message: `Error fetching admins: ${ err }` })
+  }
+}
+const updateAdmin = async () => {
+  try {
+    return Admin.findAll()
+  }
+  catch (err) {
+    logger.error({ message: `Error fetching admins: ${ err }` })
+  }
+}
+const deleteAdmin = async () => {
+  try {
+    return Admin.findAll()
+  }
+  catch (err) {
+    logger.error({ message: `Error fetching admins: ${ err }` })
+  }
+}
 
-module.exports = { refreshTokenService, registerUser, loginUser, logoutUser, adminsData, }
+module.exports = {
+  registerAdmin,
+  loginAdmin,
+  logoutAdmin,
+  getAdmins,
+  getAdmin,
+  updateAdmin,
+  deleteAdmin,
+}

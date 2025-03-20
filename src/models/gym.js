@@ -1,38 +1,41 @@
-const mongoose = require("mongoose")
+const { DataTypes } = require("sequelize")
+const { sequelize } = require("../config/db")
 
-const GymSchema = new mongoose.Schema({
-    name: {
-        type: String,
+const Gym = sequelize.define("Gym", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
     },
-    address: {
-        type: String,
-    },
-    phone: {
-        type: String,
-    },
-    email: {
-        type: String,
-        unique: true
-    },
-    trainers: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Trainer",
-    }],
-    trainees: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Trainee",
-    }],
-    subscriptionPlan: { // Could be "monthly", "yearly", etc.
-        type: String,
-    },
-    token: {
-        type: String,
-    },
-    refresh_token: {
-        type: String,
-    },
-}, {
-    timestamps: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "admin",
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
 })
 
-module.exports = mongoose.model("Gym", GymSchema)
+module.exports = Gym

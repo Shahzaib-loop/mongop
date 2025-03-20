@@ -1,53 +1,44 @@
-const mongoose = require("mongoose")
+const { DataTypes } = require("sequelize")
+const { sequelize } = require("../config/db")
 
-const TrainerSchema = new mongoose.Schema({
-    firstName: {
-        type: String,
+const Trainer = sequelize.define("Trainer", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+    primaryKey: true,
+  },
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  lastName: {
+    type: DataTypes.STRING,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
     },
-    lastName: {
-        type: String,
-    },
-    email: {
-        type: String,
-        unique: true,
-    },
-    phone: {
-        type: String,
-    },
-    password: {
-        type: String,
-    },
-    gym: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Gym",
-    },
-    trainees: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Trainee",
-    }],
-    schedule: [{
-        day: String,
-        startTime: String,
-        endTime: String,
-    }],
-    rating: { // Average rating from trainees
-        type: Number,
-        default: 0,
-    },
-    token: {
-        type: String,
-    },
-    refresh_token: {
-        type: String,
-    },
-}, {
-    timestamps: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "admin",
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
 })
 
-
-TrainerSchema.index({
-    firstName: 'text',
-    lastName: 'text',
-})
-
-module.exports = mongoose.model("Trainer", TrainerSchema)
+module.exports = Trainer

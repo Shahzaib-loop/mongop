@@ -1,19 +1,29 @@
-const express = require("express")
-const { register, login, refreshToken } = require("../controllers/auth")
-const { dataTest } = require('../services')
-const { verifyRole, } = require('../middlewares/roleIdentifier')
-const { verifyToken, } = require('../middlewares/authentication')
-
+const express = require('express')
 const router = express.Router()
+const {
+  trainerRegister,
+  trainerLogin,
+  trainerLogout,
+  trainersData,
+  trainerData,
+  trainerUpdate,
+  trainerDelete,
+} = require('../../controllers/trainer')
 
-router.post('/data', dataTest)
-
-router.post("/register", register)
-router.post("/admin/login", login)
-router.post("/refresh-token", refreshToken)
-
-router.get("/user/", verifyToken,verifyRole(["admin"]), (req, res) => {
-    console.log('get user')
+// for testing only
+router.get('/listen', (req, res, next) => {
+  res.json({ title: 'I am Trainer', Message: `I'm listening on ${ process.env.PORT }` })
 })
+
+router.post('/register', trainerRegister)
+router.post('/login', trainerLogin)
+router.post('/logout', trainerLogout)
+
+router.get('/', trainersData)
+router.get('/:id', trainerData)
+
+router.post('/create', trainerRegister)
+router.post('/update', trainerUpdate)
+router.post('/delete', trainerDelete)
 
 module.exports = router

@@ -1,42 +1,99 @@
-const {registerUser, loginUser, refreshTokenService} = require("../../services/auth")
 const logger = require("../../utils/logger")
+const responseHandler = require('../../utils/responseHandler');
+const {
+  registerTrainer,
+  loginTrainer,
+  logoutTrainer,
+  getTrainers,
+  getTrainer,
+  updateTrainer,
+  deleteTrainer,
+} = require("../../services/trainer")
 
-const register = async (req, res) => {
-    try {
-        // User Registration Controller (Now returns tokens)
-        const user = await registerUser(req.body) // Register the user
+const trainerRegister = async (req, res) => {
+  try {
+    const trainer = await registerTrainer(req.body)
 
-        console.log(user, 'user userrrrrrr')
-
-        // Generate tokens after successful registration
-        const tokens = loginUser(req.body) // Logging in immediately after registration
-
-        console.log(tokens, 'tokens userrrrrrr')
-
-        res.status(201).json({message: "User registered successfully", tokens})
-    } catch (error) {
-        // logger.info(`${error}`)
-        res.status(400).json({error: error.message})
-    }
+    responseHandler.created(res, "Trainer registered successfully", trainer)
+  }
+  catch (error) {
+    logger.info(`${ error }`)
+    responseHandler.error(res, error.message, 400, error,)
+  }
 }
 
-const login = async (req, res) => {
-    try {
-        const tokens = await loginUser(req.body)
-        res.json(tokens)
-    } catch (error) {
-        res.status(400).json({error: error.message})
-    }
+const trainerLogin = async (req, res) => {
+  try {
+    const tokens = await loginTrainer(req.body)
+
+    responseHandler.success(res, "Trainer Login successfully", tokens)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
 }
 
-const refreshToken = async (req, res) => {
-    try {
-        const {refreshToken} = req.body
-        const tokens = await refreshTokenService(refreshToken)
-        res.json(tokens)
-    } catch (error) {
-        res.status(400).json({error: error.message})
-    }
+const trainerLogout = async (req, res) => {
+  try {
+    const tokens = await logoutTrainer(req.body)
+
+    responseHandler.success(res, "Trainer Logout successfully", tokens)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
 }
 
-module.exports = {register, login, refreshToken}
+const trainersData = async (req, res) => {
+  try {
+    const data = await getTrainers()
+
+    responseHandler.success(res, "Trainees Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
+}
+
+const trainerData = async (req, res) => {
+  try {
+    const data = await getTrainer()
+
+    responseHandler.success(res, "Trainer Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
+}
+
+const trainerUpdate = async (req, res) => {
+  try {
+    const data = await updateTrainer()
+
+    responseHandler.success(res, "Trainer Updated successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
+}
+
+const trainerDelete = async (req, res) => {
+  try {
+    const data = await deleteTrainer()
+    
+    responseHandler.success(res, "Trainer Deleted successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, error.message, 400, error,)
+  }
+}
+
+module.exports = {
+  trainerRegister,
+  trainerLogin,
+  trainerLogout,
+  trainersData,
+  trainerData,
+  trainerUpdate,
+  trainerDelete,
+}
