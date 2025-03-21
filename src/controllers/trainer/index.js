@@ -1,5 +1,6 @@
 const logger = require("../../utils/logger")
-const responseHandler = require('../../utils/responseHandler');
+const responseHandler = require('../../utils/responseHandler')
+const uniqueCheck = require("../../utils/uniqueCheck")
 const {
   registerTrainer,
   loginTrainer,
@@ -18,7 +19,7 @@ const trainerRegister = async (req, res) => {
   }
   catch (error) {
     logger.info(`${ error }`)
-    responseHandler.error(res, error.message, 400, error,)
+    responseHandler.error(res, 400, "", error.message,)
   }
 }
 
@@ -29,7 +30,7 @@ const trainerLogin = async (req, res) => {
     responseHandler.success(res, "Trainer Login successfully", tokens)
   }
   catch (error) {
-    responseHandler.error(res, error.message, 400, error,)
+    responseHandler.error(res, 400, "", error.message,)
   }
 }
 
@@ -40,7 +41,7 @@ const trainerLogout = async (req, res) => {
     responseHandler.success(res, "Trainer Logout successfully", tokens)
   }
   catch (error) {
-    responseHandler.error(res, error.message, 400, error,)
+    responseHandler.error(res, 400, "", error.message,)
   }
 }
 
@@ -51,7 +52,7 @@ const trainersData = async (req, res) => {
     responseHandler.success(res, "Trainees Fetched successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, error.message, 400, error,)
+    responseHandler.error(res, 400, "", error.message,)
   }
 }
 
@@ -62,7 +63,7 @@ const trainerData = async (req, res) => {
     responseHandler.success(res, "Trainer Data Fetched successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, error.message, 400, error,)
+    responseHandler.error(res, 400, "", error.message,)
   }
 }
 
@@ -73,18 +74,18 @@ const trainerUpdate = async (req, res) => {
     responseHandler.success(res, "Trainer Updated successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, error.message, 400, error,)
+    responseHandler.error(res, 400, "", error.message,)
   }
 }
 
 const trainerDelete = async (req, res) => {
   try {
     const data = await deleteTrainer()
-    
+
     responseHandler.success(res, "Trainer Deleted successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, error.message, 400, error,)
+    responseHandler.error(res, 400, "", error.message,)
   }
 }
 

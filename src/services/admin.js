@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
 const db = require("../models")
 const logger = require("../utils/logger")
+const { uniqueCheck } = require("../utils/uniqueCheck")
 const Admin = db.sequelize.model('Admin');
 
 const generateTokens = (user) => {
@@ -13,16 +14,20 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken }
 }
 
-const registerAdmin = async ({ firstName = '', lastName = '', email = '', password = '' }) => {
-  let user = await Admin.findOne({ where: { email } });
+const registerAdmin = async (data) => {
+  let user = await uniqueCheck(Admin, data, "Admin", "email")
+
+  console.log(user, "1111 dataaaaaaaaaaaaa")
 
   if (user) throw new Error("Admin already exists")
 
-  const hashedPassword = await bcrypt.hash(password, 10)
+  const hashedPassword = await bcrypt.hash(data.password, 10)
 
-  user = await Admin.create({ firstName, lastName, email, password: hashedPassword })
+  user = await Admin.create({ ...data, password: hashedPassword })
 
-  logger.info({ message: "Admin registered successfully", email })
+  console.log(user, "2222 dataaaaaaaaaaaaa")
+
+  // logger.info({ message: "Admin registered successfully", email })
 
   return generateTokens(user)
 }

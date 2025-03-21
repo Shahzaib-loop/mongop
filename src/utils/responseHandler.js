@@ -13,11 +13,14 @@ const responseHandler = {
       data
     })
   },
-  error: (res, message = "An error occurred", statusCode = 500, errors = {}) => {
+  error: (res, statusCode = 500, message = "An error occurred", reason = '') => {
     res.status(statusCode).json({
       success: false,
-      message,
-      errors
+      errors: {
+        statusCode,
+        message,
+        reason,
+      }
     })
   },
   notFound: (res, message = "Resource not found") => {

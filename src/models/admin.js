@@ -31,6 +31,10 @@ const Admin = sequelize.define("Admin", {
     type: DataTypes.STRING,
     defaultValue: "admin",
   },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
