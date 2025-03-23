@@ -15,21 +15,13 @@ const generateTokens = (user) => {
 }
 
 const registerAdmin = async (data) => {
-  let user = await uniqueCheck(Admin, data, "Admin", "email")
-
-  console.log(user, "1111 dataaaaaaaaaaaaa")
-
-  if (user) throw new Error("Admin already exists")
-
   const hashedPassword = await bcrypt.hash(data.password, 10)
 
-  user = await Admin.create({ ...data, password: hashedPassword })
+  let user = await Admin.create({ ...data, password: hashedPassword })
 
   console.log(user, "2222 dataaaaaaaaaaaaa")
 
-  // logger.info({ message: "Admin registered successfully", email })
-
-  return generateTokens(user)
+  return user
 }
 
 const loginAdmin = async ({ email = '', password = '' }) => {

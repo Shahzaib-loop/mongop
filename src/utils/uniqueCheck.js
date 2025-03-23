@@ -1,5 +1,8 @@
 const uniqueCheck = async (model, data = '', roleType = '', fieldType = '') => {
-  const record = model.findOne({ where: { [fieldType]: data, deleted: false }, raw: true })
+  let fieldValue =data[fieldType]
+  const record = await model.findOne({ where: { [fieldType]: fieldValue, deleted: false }, raw: true })
+
+  console.log(record, "rrrrrrrrrrrrrrr")
 
   if (record) {
     return {

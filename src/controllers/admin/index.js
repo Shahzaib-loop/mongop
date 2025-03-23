@@ -1,6 +1,8 @@
+const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require("../../utils/responseHandler")
-const uniqueCheck = require("../../utils/uniqueCheck")
+const { uniqueCheck } = require("../../utils/uniqueCheck")
+const Admin = db.sequelize.model('Admin')
 const {
   registerAdmin,
   loginAdmin,
@@ -19,15 +21,25 @@ const adminRegister = async (req, res) => {
       return responseHandler.error(res, 500, "Required fields are invalid", "required fields are empty or invalid")
     }
 
+    console.log(req.body,'user 000000 lllllllllllllllll')
+
+    let userCheck = await uniqueCheck(Admin, req.body, "Admin", "email")
+
+    console.log(userCheck, 'user 111111 lllllllllllllllll')
+
+    if (userCheck?.reason) {
+      return responseHandler.error(res, 409, userCheck.message, userCheck.reason)
+    }
+
     const user = await registerAdmin(req.body)
 
-    console.log(user, 'user lllllllllllllllll')
+    console.log(user, 'user 222222 lllllllllllllllll')
 
-    responseHandler.created(res, "Admin registered successfully", user)
+    return responseHandler.created(res, "Admin registered successfully", user)
   }
   catch (error) {
     logger.error(`${ error }`)
-    responseHandler.error(res, 500, "Error while registering Admin", error?.message,)
+    return responseHandler.error(res, 500, "Error while registering Admin", error?.message,)
   }
 }
 
