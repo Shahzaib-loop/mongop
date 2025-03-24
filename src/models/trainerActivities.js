@@ -1,39 +1,24 @@
 const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
 
-const Admin = sequelize.define("Admin", {
+const TrainerActivities = sequelize.define("TrainerActivities", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     primaryKey: true,
   },
-  role: {
-    type: DataTypes.STRING,
-    defaultValue: "admin",
-  },
-  firstName: {
+  trainerId: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  lastName: {
-    type: DataTypes.STRING,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-    validate: {
-      isEmail: true,
-    },
-  },
-  password: {
+  action: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  deleted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
+  activity: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -45,4 +30,4 @@ const Admin = sequelize.define("Admin", {
   },
 })
 
-module.exports = Admin
+module.exports = TrainerActivities

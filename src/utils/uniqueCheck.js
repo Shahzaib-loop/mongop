@@ -1,13 +1,26 @@
-const uniqueCheck = async (model, data = '', roleType = '', fieldType = '') => {
-  let fieldValue =data[fieldType]
-  const record = await model.findOne({ where: { [fieldType]: fieldValue, deleted: false }, raw: true })
+const { Op } = require("sequelize");
 
-  console.log(record, "rrrrrrrrrrrrrrr")
+const uniqueCheck = async (model, data = {}, roleType = '',) => {
+  let numValue = data['number']
+  let emailValue = data['email']
+
+  const record = await model.findOne({
+    where: {
+      [Op.or]: [
+        { email: emailValue },
+        { number: numValue }
+      ],
+      deleted: false
+    },
+    raw: true
+  })
+
+  console.log("[middleware] Unique Check Record: ", record)
 
   if (record) {
     return {
-      message: `${ fieldType } already exists`,
-      reason: `${ fieldType } is already associated with another ${ roleType }`,
+      message: `${ roleType } already exists`,
+      reason: `email or number is already associated with another ${ roleType }`,
     }
   }
 }

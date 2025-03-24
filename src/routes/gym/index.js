@@ -8,6 +8,7 @@ const {
   gymData,
   gymUpdate,
   gymDelete,
+  gymRestore,
 } = require('../../controllers/gym')
 
 // for testing only
@@ -23,7 +24,8 @@ router.get('/', gymsData)
 router.get('/:id', gymData)
 
 router.post('/create', gymRegister)
-router.post('/update', gymUpdate)
-router.post('/delete', gymDelete)
+router.post('/update/:id', gymUpdate)
+router.post('/delete/:id', gymDelete)
+router.post('/restore/:id', gymRestore)
 
 module.exports = router

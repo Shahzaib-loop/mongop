@@ -8,7 +8,15 @@ const Gym = sequelize.define("Gym", {
     allowNull: false,
     primaryKey: true,
   },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "gym",
+  },
   name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  ownerName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -20,13 +28,40 @@ const Gym = sequelize.define("Gym", {
       isEmail: true,
     },
   },
+  number: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isNumeric: true,
+    },
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  role: {
+  address: {
     type: DataTypes.STRING,
-    defaultValue: "admin",
+    allowNull: false,
+  },
+  state: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  country: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  zipCode: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      isNumeric: true,
+    },
   },
   deleted: {
     type: DataTypes.BOOLEAN,

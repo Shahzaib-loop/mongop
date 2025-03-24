@@ -23,12 +23,12 @@ const adminRegister = async (req, res) => {
 
     console.log(req.body,'user 000000 lllllllllllllllll')
 
-    let userCheck = await uniqueCheck(Admin, req.body, "Admin", "email")
+    let isExisting = await uniqueCheck(Admin, req.body, "Admin", "email")
 
-    console.log(userCheck, 'user 111111 lllllllllllllllll')
+    console.log(isExisting, 'user 111111 lllllllllllllllll')
 
-    if (userCheck?.reason) {
-      return responseHandler.error(res, 409, userCheck.message, userCheck.reason)
+    if (isExisting?.reason) {
+      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
     const user = await registerAdmin(req.body)
