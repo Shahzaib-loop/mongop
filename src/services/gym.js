@@ -1,20 +1,9 @@
-const jwt = require("jsonwebtoken")
-const bcrypt = require("bcryptjs")
 const db = require("../models")
-const logger = require("../utils/logger")
-const { where } = require('sequelize');
+const bcrypt = require("bcryptjs")
+const { generateTokens } = require('../utils/auth')
 const Gym = db.sequelize.model('Gym')
 
-const generateTokens = (user) => {
-  const { _id = '', role = 'gym' } = user
-
-  const accessToken = jwt.sign({ id: _id, role }, process.env.JWT_SECRET, { expiresIn: "15m" })
-  const refreshToken = jwt.sign({ id: _id }, process.env.REFRESH_SECRET, { expiresIn: "7d" })
-
-  return { accessToken, refreshToken }
-}
-
-const registerGym = async (data) => {
+const createGym = async (data) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
 
   let gym = await Gym.create({ ...data, password: hashedPassword })
@@ -23,28 +12,23 @@ const registerGym = async (data) => {
 }
 
 const loginGym = async ({ email, password }) => {
-  const user = await Gym.findOne({ where: { email } })
+  const gym = await Gym.findOne({ where: { email } })
 
-  const isMatch = await bcrypt.compare(password, user.password)
+  if (!gym) return false
 
-  if (isMatch) return false
+  const isMatch = await bcrypt.compare(password, gym.password)
 
-  const tokens = generateTokens(user)
+  if (!isMatch) return false
 
-  return tokens
+  const tokens = generateTokens(gym)
+
+  if (!tokens) return false
+
+  return { gym, tokens }
 }
 
 const logoutGym = async (email) => {
-  const user = await Gym.findOne({ email })
-  if (!user) throw new Error("Invalid email or password")
-
-  const isMatch = await bcrypt.compare(password, user.password)
-  if (!isMatch) throw new Error("Invalid email or password")
-
-  const tokens = generateTokens(user)
-  logger.info({ message: "Gym logged in", email })
-
-  return tokens
+  return email
 }
 
 const getGyms = async () => {
@@ -68,7 +52,7 @@ const restoreGym = async (id) => {
 }
 
 module.exports = {
-  registerGym,
+  createGym,
   loginGym,
   logoutGym,
   getGyms,

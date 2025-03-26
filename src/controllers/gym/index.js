@@ -2,10 +2,11 @@ const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
+const { addActivity } = require("../../utils/activities")
 const Gym = db.sequelize.model('Gym')
-const { addActivity } = require("../../services/gymActivities")
+const GymActivities = db.sequelize.model('GymActivities')
 const {
-  registerGym,
+  createGym,
   loginGym,
   logoutGym,
   getGyms,
@@ -19,7 +20,7 @@ const {
 //  after verification the account will register & user will login with access & refresh tokens
 //  there will be timer to verify, when timer ends the user will be soft deleted
 
-const gymRegister = async (req, res) => {
+const gymCreate = async (req, res) => {
   try {
     const {
       name = '',
@@ -44,9 +45,9 @@ const gymRegister = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const gym = await registerGym(req.body)
+    const gym = await createGym(req.body)
 
-    await addActivity({ gymId: gym?.id, action: "GYM_CREATED", activity: "gym registered" })
+    await addActivity(GymActivities, gym?.id, "GYM_CREATED", "gym registered")
 
     responseHandler.created(res, "Gym Registered successfully", gym)
   }
@@ -64,12 +65,16 @@ const gymLogin = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "invalid email or password")
     }
 
-    const tokens = await loginGym({ email, password })
+    const resp = await loginGym({ email, password })
 
-    responseHandler.success(res, "Gym Login successfully", tokens)
+    if (!resp) {
+      return responseHandler.error(res, 500, "Email or Password is Incorrect", "email or password is not found",)
+    }
+
+    responseHandler.success(res, "Gym Login successfully", resp)
   }
   catch (error) {
-    responseHandler.error(res, 400, "", error.message,)
+    responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -80,7 +85,7 @@ const gymLogout = async (req, res) => {
     responseHandler.success(res, "Gym Logout successfully", tokens)
   }
   catch (error) {
-    responseHandler.error(res, 400, "", error.message,)
+    responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -98,6 +103,7 @@ const gymsData = async (req, res) => {
 const gymData = async (req, res) => {
   try {
     const { id = '' } = req.params
+
     const data = await getGym(id)
 
     responseHandler.success(res, "Gym Data Fetched successfully", data)
@@ -118,7 +124,7 @@ const gymUpdate = async (req, res) => {
 
     await updateGym(id, rest)
 
-    await addActivity({ gymId: id, action: "GYM_UPDATED", activity: "gym updated" })
+    await addActivity(GymActivities, id, "GYM_UPDATED", "gym updated")
 
     responseHandler.success(res, "Gym Updated successfully")
   }
@@ -137,7 +143,7 @@ const gymDelete = async (req, res) => {
 
     await deleteGym(id)
 
-    await addActivity({ gymId: id, action: "GYM_DELETED", activity: "gym deleted" })
+    await addActivity(GymActivities, id, "GYM_DELETED", "gym deleted")
 
     responseHandler.success(res, "Gym Deleted successfully")
   }
@@ -156,7 +162,7 @@ const gymRestore = async (req, res) => {
 
     await restoreGym(id)
 
-    await addActivity({ gymId: id, action: "GYM_RESTORED", activity: "gym restored" })
+    await addActivity(GymActivities, id, "GYM_RESTORED", "gym restored")
 
     responseHandler.success(res, "Gym Restored successfully")
   }
@@ -166,7 +172,7 @@ const gymRestore = async (req, res) => {
 }
 
 module.exports = {
-  gymRegister,
+  gymCreate,
   gymLogin,
   gymLogout,
   gymsData,

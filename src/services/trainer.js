@@ -1,101 +1,59 @@
-const jwt = require("jsonwebtoken")
-const bcrypt = require("bcryptjs")
 const db = require("../models")
-const logger = require("../utils/logger")
+const bcrypt = require("bcryptjs")
+const { generateTokens } = require('../utils/auth')
 const Trainer = db.sequelize.model('Trainer');
 
-const generateTokens = (user) => {
-  const { _id = '', role = 'trainer' } = user
+const createTrainer = async (data) => {
+  const hashedPassword = await bcrypt.hash(data.password, 10)
 
-  const accessToken = jwt.sign({ id: _id, role }, process.env.JWT_SECRET, { expiresIn: "15m" })
-  const refreshToken = jwt.sign({ id: _id }, process.env.REFRESH_SECRET, { expiresIn: "7d" })
+  let trainer = await Trainer.create({ ...data, password: hashedPassword })
 
-  return { accessToken, refreshToken }
-}
-
-const registerTrainer = async ({ firstName = '', lastName = '', email = '', password = '' }) => {
-  let user = await Trainer.findOne({ where: { email } });
-
-  if (user) throw new Error("Trainer already exists")
-
-  const hashedPassword = await bcrypt.hash(password, 10)
-
-  user = await Trainer.create({ firstName, lastName, email, password: hashedPassword })
-
-  logger.info({ message: "Trainer registered successfully", email })
-
-  return generateTokens(user)
+  return trainer
 }
 
 const loginTrainer = async ({ email, password }) => {
-  const user = await Trainer.findOne({ email })
-  if (!user) throw new Error("Invalid email or password")
+  const user = await Trainer.findOne({ where: { email } })
 
   const isMatch = await bcrypt.compare(password, user.password)
-  if (!isMatch) throw new Error("Invalid email or password")
+
+  if (isMatch) return false
 
   const tokens = generateTokens(user)
-
-  logger.info({ message: "Trainer logged in", email })
 
   return tokens
 }
 
 const logoutTrainer = async (email) => {
-  const user = await Trainer.findOne({ email })
-  if (!user) throw new Error("Invalid email or password")
-
-  const isMatch = await bcrypt.compare(password, user.password)
-  if (!isMatch) throw new Error("Invalid email or password")
-
-  const tokens = generateTokens(user)
-  logger.info({ message: "Trainer logged in", email })
-
-  return tokens
+  return email
 }
 
 const getTrainers = async () => {
-  try {
-    return Trainer.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+  return Trainer.findAll()
 }
 
-const getTrainer = async () => {
-  try {
-    return Trainer.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+const getTrainer = async (id) => {
+  return Trainer.findOne({ where: { id } })
 }
 
-const updateTrainer = async () => {
-  try {
-    return Trainer.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+const updateTrainer = async (id, data) => {
+  return Trainer.update(data, { where: { id } })
 }
 
 const deleteTrainer = async () => {
-  try {
-    return Trainer.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+  return Trainer.update({ deleted: true }, { where: { id } })
+}
+
+const restoreTrainer = async () => {
+  return Trainer.update({ deleted: false }, { where: { id } })
 }
 
 module.exports = {
-  registerTrainer,
+  createTrainer,
   loginTrainer,
   logoutTrainer,
   getTrainers,
   getTrainer,
   updateTrainer,
   deleteTrainer,
+  restoreTrainer,
 }

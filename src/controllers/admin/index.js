@@ -2,28 +2,37 @@ const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require("../../utils/responseHandler")
 const { uniqueCheck } = require("../../utils/uniqueCheck")
+const { addActivity } = require('../../utils/activities');
 const Admin = db.sequelize.model('Admin')
+const AdminActivities = db.sequelize.model('AdminActivities')
 const {
-  registerAdmin,
+  createAdmin,
   loginAdmin,
   logoutAdmin,
   getAdmins,
   getAdmin,
   updateAdmin,
   deleteAdmin,
+  restoreAdmin,
 } = require("../../services/admin")
 
-const adminRegister = async (req, res) => {
+const adminCreate = async (req, res) => {
   try {
-    const { firstName = '', lastName = '', email = '', number = '', password = '' } = req.body
+    const {
+      firstName = '',
+      lastName = '',
+      email = '',
+      number = '',
+      password = '',
+    } = req.body
 
     if (!(firstName && lastName && email && number && password)) {
-      return responseHandler.error(res, 500, "Required fields are invalid", "required fields are empty or invalid")
+      return responseHandler.error(res, 400, "Required fields are invalid", "required fields are empty or invalid")
     }
 
-    console.log(req.body,'user 000000 lllllllllllllllll')
+    console.log(req.body, 'user 000000 lllllllllllllllll')
 
-    let isExisting = await uniqueCheck(Admin, req.body, "Admin", "email")
+    let isExisting = await uniqueCheck(Admin, req.body, "Admin")
 
     console.log(isExisting, 'user 111111 lllllllllllllllll')
 
@@ -31,7 +40,7 @@ const adminRegister = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const user = await registerAdmin(req.body)
+    const user = await createAdmin(req.body)
 
     console.log(user, 'user 222222 lllllllllllllllll')
 
@@ -78,7 +87,9 @@ const adminsData = async (req, res) => {
 
 const adminData = async (req, res) => {
   try {
-    const data = await getAdmin()
+    const { id = '' } = req.params
+
+    const data = await getAdmin(id)
 
     responseHandler.success(res, "Admin Data Fetched successfully", data)
   }
@@ -89,32 +100,65 @@ const adminData = async (req, res) => {
 
 const adminUpdate = async (req, res) => {
   try {
-    const data = await updateAdmin()
+    const { id = '' } = req?.params
+    const { number, email, password, ...rest } = req?.body
 
-    responseHandler.success(res, "Admins Updated successfully", data)
+    await updateAdmin(id, rest)
+
+    await addActivity(AdminActivities, id, "ADMIN_UPDATED", "admin updated")
+
+    responseHandler.success(res, "Admin Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 400, "", error.message,)
+    responseHandler.error(res, 500, "", error.message,)
   }
 }
 
 const adminDelete = async (req, res) => {
   try {
-    const data = await deleteAdmin()
+    const { id = '', } = req?.params
 
-    responseHandler.success(res, "Admins Deleted successfully", data)
+    if (!id) {
+      return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
+    }
+
+    await deleteAdmin(id)
+
+    await addActivity(AdminActivities, id, "ADMIN_DELETED", "admin deleted")
+
+    responseHandler.success(res, "Admin Deleted successfully")
   }
   catch (error) {
-    responseHandler.error(res, 400, "", error.message,)
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+const adminRestore = async (req, res) => {
+  try {
+    const { id = '', } = req?.params
+
+    if (!id) {
+      return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
+    }
+
+    await restoreAdmin(id)
+
+    await addActivity(AdminActivities, id, "ADMIN_RESTORED", "admin restored")
+
+    responseHandler.success(res, "Admin Restored successfully")
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
   }
 }
 
 module.exports = {
-  adminRegister,
+  adminCreate,
   adminLogin,
   adminLogout,
   adminsData,
   adminData,
   adminUpdate,
   adminDelete,
+  adminRestore,
 }

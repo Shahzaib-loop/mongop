@@ -1,20 +1,9 @@
-const jwt = require("jsonwebtoken")
-const bcrypt = require("bcryptjs")
 const db = require("../models")
-const logger = require("../utils/logger")
-const { uniqueCheck } = require("../utils/uniqueCheck")
+const bcrypt = require("bcryptjs")
+const { generateTokens } = require('../utils/auth')
 const Admin = db.sequelize.model('Admin');
 
-const generateTokens = (user) => {
-  const { _id = '', role = 'admin' } = user
-
-  const accessToken = jwt.sign({ id: _id, role }, process.env.JWT_SECRET, { expiresIn: "15m" })
-  const refreshToken = jwt.sign({ id: _id }, process.env.REFRESH_SECRET, { expiresIn: "7d" })
-
-  return { accessToken, refreshToken }
-}
-
-const registerAdmin = async (data) => {
+const createAdmin = async (data) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
 
   let user = await Admin.create({ ...data, password: hashedPassword })
@@ -39,58 +28,36 @@ const loginAdmin = async ({ email = '', password = '' }) => {
 }
 
 const logoutAdmin = async (email = '') => {
-  const user = await Admin.findOne({ email })
-  if (!user) throw new Error("Invalid email or password")
-
-  const isMatch = await bcrypt.compare(password, user.password)
-  if (!isMatch) throw new Error("Invalid email or password")
-
-  const tokens = generateTokens(user)
-  logger.info({ message: "Admin logged in", email })
-
-  return tokens
+  return email
 }
 
 const getAdmins = async () => {
-  try {
-    return Admin.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+  return Admin.findAll()
 }
 
-const getAdmin = async () => {
-  try {
-    return Admin.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+const getAdmin = async (id) => {
+  return Admin.findOne({ where: { id } })
 }
-const updateAdmin = async () => {
-  try {
-    return Admin.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+
+const updateAdmin = async (id, data) => {
+  return Admin.update(data, { where: { id } })
 }
+
 const deleteAdmin = async () => {
-  try {
-    return Admin.findAll()
-  }
-  catch (err) {
-    logger.error({ message: `Error fetching admins: ${ err }` })
-  }
+  return Admin.update({ deleted: true }, { where: { id } })
+}
+
+const restoreAdmin = async (id) => {
+  return Admin.update({ deleted: false }, { where: { id } })
 }
 
 module.exports = {
-  registerAdmin,
+  createAdmin,
   loginAdmin,
   logoutAdmin,
   getAdmins,
   getAdmin,
   updateAdmin,
   deleteAdmin,
+  restoreAdmin,
 }

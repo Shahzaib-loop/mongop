@@ -1,13 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const {
-  adminRegister,
+  adminCreate,
   adminLogin,
   adminLogout,
   adminsData,
   adminData,
   adminUpdate,
-  adminDelete
+  adminDelete,
+  adminRestore,
 } = require('../../controllers/admin')
 
 // for testing only
@@ -15,15 +16,16 @@ router.get('/listen', (req, res, next) => {
   res.json({ title: 'I am Admin', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-router.post('/register', adminRegister)
+router.post('/register', adminCreate)
 router.post('/login', adminLogin)
 router.post('/logout', adminLogout)
 
 router.get('/', adminsData)
 router.get('/:id', adminData)
 
-router.post('/create', adminRegister)
-router.post('/update', adminUpdate)
-router.post('/delete', adminDelete)
+router.post('/create', adminCreate)
+router.post('/update/:id', adminUpdate)
+router.post('/delete/:id', adminDelete)
+router.post('/restore/:id', adminRestore)
 
 module.exports = router
