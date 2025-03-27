@@ -4,12 +4,17 @@ const app = express()
 const cors = require("cors")
 const morgan = require("morgan")
 const logger = require('./utils/logger')
+const { checkAuthentication } = require('./utils/auth')
 const responseHandler = require('./utils/responseHandler')
+
+const indexRouter = require('./routes/index')
 
 app.use(cors())
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+app.use(checkAuthentication())
 
 app.use((req, res, next) => {
   const start = process.hrtime()
@@ -30,14 +35,10 @@ app.use((req, res, next) => {
   next()
 })
 
-const indexRouter = require('./routes/index')
-
 app.use('/api', indexRouter)
 
 
-
-
-
+app.get('/healthcheck', (req, res) => res.status(200).send({ status: 'ok', health: 'ok', }))
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => next(createError(404)))
@@ -49,9 +50,7 @@ app.use((err, req, res, next) => {
   res.locals.error = req.app.get('env') === 'development' ? err : {}
 
   // render the error page
-  res.status(500).json({ body: err.message })
+  responseHandler.error(res, 500, `Error: ${ err.message }`)
 })
-
-app.get('/healthcheck', (req, res) => res.status(200).send('ok'))
 
 module.exports = app

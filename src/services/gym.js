@@ -12,9 +12,9 @@ const createGym = async (data) => {
 }
 
 const loginGym = async ({ email, password }) => {
-  const gym = await Gym.findOne({ where: { email } })
+  const gym = await Gym.findOne({ where: { email }, raw: true })
 
-  if (!gym) return false
+  if (!(Object.keys(gym).length > 0)) return false
 
   const isMatch = await bcrypt.compare(password, gym.password)
 
@@ -22,13 +22,21 @@ const loginGym = async ({ email, password }) => {
 
   const tokens = generateTokens(gym)
 
-  if (!tokens) return false
+  if (!(Object.keys(tokens).length > 0)) return false
 
   return { gym, tokens }
 }
 
-const logoutGym = async (email) => {
-  return email
+const logoutGym = async (refreshToken) => {
+  try {
+    // In a production environment, you would want to:
+    // 1. Add the refresh token to a blacklist in Redis/database
+    // 2. Set an expiry on the blacklisted token
+    // For now, we'll just return success
+    return { success: true, message: "Logged out successfully" }
+  } catch (error) {
+    return false
+  }
 }
 
 const getGyms = async () => {

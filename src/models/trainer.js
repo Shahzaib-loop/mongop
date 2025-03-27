@@ -23,6 +23,14 @@ const Trainer = sequelize.define("Trainer", {
       isEmail: true,
     },
   },
+  number: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isNumeric: true,
+    },
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,

@@ -50,9 +50,19 @@ const traineeCreate = async (req, res) => {
 
 const traineeLogin = async (req, res) => {
   try {
-    const tokens = await loginTrainee(req.body)
+    const { email = '', password = '' } = req.body
 
-    responseHandler.success(res, "Trainee Login successfully", tokens)
+    if (!(email && password)) {
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+    }
+
+    const resp = await loginTrainee({ email, password })
+
+    if (!(Object.keys(resp).length > 0)) {
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+    }
+
+    responseHandler.success(res, "Admin Login successfully", resp)
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)

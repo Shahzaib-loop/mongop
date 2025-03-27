@@ -62,13 +62,13 @@ const gymLogin = async (req, res) => {
     const { email = '', password = '' } = req.body
 
     if (!(email && password)) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "invalid email or password")
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
     }
 
     const resp = await loginGym({ email, password })
 
-    if (!resp) {
-      return responseHandler.error(res, 500, "Email or Password is Incorrect", "email or password is not found",)
+    if (!(Object.keys(resp).length > 0)) {
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
     }
 
     responseHandler.success(res, "Gym Login successfully", resp)
@@ -80,12 +80,22 @@ const gymLogin = async (req, res) => {
 
 const gymLogout = async (req, res) => {
   try {
-    const tokens = await logoutGym(req.body)
+    const { refreshToken } = req.body
 
-    responseHandler.success(res, "Gym Logout successfully", tokens)
+    if (!refreshToken) {
+      return responseHandler.error(res, 400, "Refresh token required", "refresh token is missing")
+    }
+
+    const result = await logoutGym(refreshToken)
+
+    if (!result) {
+      return responseHandler.error(res, 500, "Logout failed", "failed to process logout")
+    }
+
+    responseHandler.success(res, "Gym Logout successfully", result)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    responseHandler.error(res, 500, "", error.message)
   }
 }
 
@@ -171,6 +181,38 @@ const gymRestore = async (req, res) => {
   }
 }
 
+const addTrainer = (req, res) => {
+  try {
+    const { firstName, lastName, email, number, } = req?.body
+
+    if (!(firstName && lastName && email && number)) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    responseHandler.error(res, 500, "", "")
+
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+const addTrainee = (req, res) => {
+  try {
+    const { firstName, lastName, email, number, } = req?.body
+
+    if (!(firstName && lastName && email && number)) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    responseHandler.error(res, 500, "", "")
+
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
 module.exports = {
   gymCreate,
   gymLogin,
@@ -180,4 +222,6 @@ module.exports = {
   gymUpdate,
   gymDelete,
   gymRestore,
+  addTrainer,
+  addTrainee,
 }

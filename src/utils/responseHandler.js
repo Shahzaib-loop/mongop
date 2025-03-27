@@ -1,3 +1,7 @@
+// status codes
+// 409 = for already existing data like adding same data again
+// 401 = unauthorized means email password invalid or profile never created
+
 const responseHandler = {
   success: (res, message = "Success", data = {}) => {
     res.status(200).json({
@@ -23,22 +27,31 @@ const responseHandler = {
       }
     })
   },
-  notFound: (res, message = "Resource not found") => {
+  notFound: (res, message = "Resource not found", reason = '') => {
     res.status(404).json({
       success: false,
-      message
+      error: {
+        message,
+        reason,
+      }
     })
   },
-  unauthorized: (res, message = "Unauthorized access") => {
+  unauthorized: (res, message = "Unauthorized access", reason = 'invalid data') => {
     res.status(401).json({
       success: false,
-      message
+      error: {
+        message,
+        reason,
+      }
     })
   },
-  forbidden: (res, message = "Forbidden access") => {
+  forbidden: (res, message = "Forbidden access", reason = '') => {
     res.status(403).json({
       success: false,
-      message
+      error: {
+        message,
+        reason,
+      }
     })
   }
 }

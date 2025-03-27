@@ -1,18 +1,40 @@
 const jwt = require('jsonwebtoken')
+const responseHandler = require('./responseHandler')
 
 const generateTokens = (user) => {
-  const { _id = '', role = '' } = user
+  const { id = '', role = '' } = user
 
-  if (!(_id && role)) {
+  if (!(id && role)) {
     return false
   }
 
-  const accessToken = jwt.sign({ id: _id, role }, process.env.JWT_SECRET, { expiresIn: "15m" })
-  const refreshToken = jwt.sign({ id: _id }, process.env.REFRESH_SECRET, { expiresIn: "7d" })
+  const accessToken = jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "15m" })
+  const refreshToken = jwt.sign({ id }, process.env.REFRESH_SECRET, { expiresIn: "7d" })
 
   return { accessToken, refreshToken }
 }
 
+function checkAuthentication() {
+  return (req, res, next) => {
+    if (req.url === '/healthcheck') return next()
+
+    const token = req.headers.authorization?.split(' ')[1] // Get token from Bearer header
+
+    if (!token) {
+      return responseHandler.unauthorized(res, "No token provided", "authorization token is missing")
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      req.user = decoded
+      next()
+    } catch (error) {
+      return responseHandler.unauthorized(res, "Invalid token", "token is invalid or expired")
+    }
+  }
+}
+
 module.exports = {
   generateTokens,
+  checkAuthentication,
 }

@@ -12,15 +12,19 @@ const createTrainer = async (data) => {
 }
 
 const loginTrainer = async ({ email, password }) => {
-  const user = await Trainer.findOne({ where: { email } })
+  const trainer = await Trainer.findOne({ where: { email }, raw: true })
 
-  const isMatch = await bcrypt.compare(password, user.password)
+  if (!(Object.keys(trainer).length > 0)) return false
 
-  if (isMatch) return false
+  const isMatch = await bcrypt.compare(password, trainer.password)
 
-  const tokens = generateTokens(user)
+  if (!isMatch) return false
 
-  return tokens
+  const tokens = generateTokens(trainer)
+
+  if (!(Object.keys(tokens).length > 0)) return false
+
+  return { trainer, tokens }
 }
 
 const logoutTrainer = async (email) => {

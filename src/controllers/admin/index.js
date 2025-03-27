@@ -54,9 +54,19 @@ const adminCreate = async (req, res) => {
 
 const adminLogin = async (req, res) => {
   try {
-    const tokens = await loginAdmin(req.body)
+    const { email = '', password = '' } = req.body
 
-    responseHandler.success(res, "Admin login successfully", tokens)
+    if (!(email && password)) {
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+    }
+
+    const resp = await loginAdmin({ email, password })
+
+    if (!(Object.keys(resp).length > 0)) {
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+    }
+
+    responseHandler.success(res, "Admin Login successfully", resp)
   }
   catch (error) {
     responseHandler.error(res, 400, "", error.message,)

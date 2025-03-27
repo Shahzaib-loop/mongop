@@ -12,15 +12,19 @@ const createTrainee = async (data) => {
 }
 
 const loginTrainee = async ({ email, password }) => {
-  const user = await Trainee.findOne({ where: { email } })
+  const trainee = await Trainee.findOne({ where: { email }, raw: true })
 
-  const isMatch = await bcrypt.compare(password, user.password)
+  if (!(Object.keys(trainee).length > 0)) return false
 
-  if (isMatch) return false
+  const isMatch = await bcrypt.compare(password, trainee.password)
 
-  const tokens = generateTokens(user)
+  if (!isMatch) return false
 
-  return tokens
+  const tokens = generateTokens(trainee)
+
+  if (!(Object.keys(tokens).length > 0)) return false
+
+  return { trainee, tokens }
 }
 
 const logoutTrainee = async (email) => {

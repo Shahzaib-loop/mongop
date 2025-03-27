@@ -50,9 +50,19 @@ const trainerCreate = async (req, res) => {
 
 const trainerLogin = async (req, res) => {
   try {
-    const tokens = await loginTrainer(req.body)
+    const { email = '', password = '' } = req.body
 
-    responseHandler.success(res, "Trainer Login successfully", tokens)
+    if (!(email && password)) {
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+    }
+
+    const resp = await loginTrainer({ email, password })
+
+    if (!(Object.keys(resp).length > 0)) {
+      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+    }
+
+    responseHandler.success(res, "Gym Login successfully", resp)
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)

@@ -14,17 +14,19 @@ const createAdmin = async (data) => {
 }
 
 const loginAdmin = async ({ email = '', password = '' }) => {
-  const user = await Admin.findOne({ email })
-  if (!user) throw new Error("Invalid email or password")
+  const admin = await Admin.findOne({ where: { email }, raw: true })
 
-  const isMatch = await bcrypt.compare(password, user.password)
-  if (!isMatch) throw new Error("Invalid email or password")
+  if (!(Object.keys(admin).length > 0)) return false
 
-  const tokens = generateTokens(user)
+  const isMatch = await bcrypt.compare(password, admin.password)
 
-  logger.info({ message: "Admin logged in", email })
+  if (!isMatch) return false
 
-  return tokens
+  const tokens = generateTokens(admin)
+
+  if (!(Object.keys(tokens).length > 0)) return false
+
+  return { admin, tokens }
 }
 
 const logoutAdmin = async (email = '') => {
