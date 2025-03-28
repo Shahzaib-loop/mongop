@@ -6,6 +6,7 @@ const {
   trainerLogout,
   trainersData,
   trainerData,
+  trainerActivities,
   trainerUpdate,
   trainerDelete,
   trainerRestore,
@@ -22,6 +23,7 @@ router.post('/logout', trainerLogout)
 
 router.get('/', trainersData)
 router.get('/:id', trainerData)
+router.get('/activities/:id', trainerActivities)
 
 router.post('/create', trainerCreate)
 router.post('/update/:id', trainerUpdate)

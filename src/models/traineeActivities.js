@@ -9,7 +9,7 @@ const TraineeActivities = sequelize.define("TraineeActivities", {
     primaryKey: true,
   },
   traineeId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
   },
   action: {

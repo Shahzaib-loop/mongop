@@ -11,6 +11,7 @@ const {
   logoutTrainer,
   getTrainers,
   getTrainer,
+  getTrainerActivities,
   updateTrainer,
   deleteTrainer,
   restoreTrainer,
@@ -18,6 +19,7 @@ const {
 
 const trainerCreate = async (req, res) => {
   try {
+    const tempPassword = 'tester123'
     const {
       firstName = '',
       lastName = '',
@@ -36,11 +38,12 @@ const trainerCreate = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const trainee = await createTrainer(req.body)
+    let trainer = await createTrainer({ ...req.body, password: password ? password : tempPassword })
+    trainer = await trainer.toJSON()
 
-    await addActivity(TrainerActivities, trainee?.id, "TRAINER_CREATED", "trainer registered")
+    await addActivity(TrainerActivities, trainer?.id, "TRAINER_CREATED", "trainer registered")
 
-    responseHandler.created(res, "Trainer registered successfully", trainee)
+    responseHandler.created(res, "Trainer registered successfully", trainer)
   }
   catch (error) {
     logger.error(`${ error }`)
@@ -96,6 +99,19 @@ const trainerData = async (req, res) => {
     const { id = '' } = req.params
 
     const data = await getTrainer(id)
+
+    responseHandler.success(res, "Trainer Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+const trainerActivities = async (req, res) => {
+  try {
+    const { id = '' } = req.params
+
+    const data = await getTrainerActivities(id)
 
     responseHandler.success(res, "Trainer Data Fetched successfully", data)
   }
@@ -164,6 +180,7 @@ module.exports = {
   trainerLogout,
   trainersData,
   trainerData,
+  trainerActivities,
   trainerUpdate,
   trainerDelete,
   trainerRestore,

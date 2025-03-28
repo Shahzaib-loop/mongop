@@ -37,7 +37,15 @@ const Trainer = sequelize.define("Trainer", {
   },
   role: {
     type: DataTypes.STRING,
-    defaultValue: "admin",
+    defaultValue: "trainer",
+  },
+  gymId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    // references: {
+    //   model: Gym,
+    //   key: 'id',
+    // },
   },
   deleted: {
     type: DataTypes.BOOLEAN,

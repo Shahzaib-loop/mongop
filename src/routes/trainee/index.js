@@ -6,6 +6,7 @@ const {
   traineeLogout,
   traineesData,
   traineeData,
+  traineeActivities,
   traineeUpdate,
   traineeDelete,
   traineeRestore,
@@ -22,6 +23,7 @@ router.post('/logout', traineeLogout)
 
 router.get('/', traineesData)
 router.get('/:id', traineeData)
+router.get('/activities/:id', traineeActivities)
 
 router.post('/create', traineeCreate)
 router.post('/update/:id', traineeUpdate)

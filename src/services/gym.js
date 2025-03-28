@@ -2,6 +2,7 @@ const db = require("../models")
 const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../utils/auth')
 const Gym = db.sequelize.model('Gym')
+const GymActivities = db.sequelize.model('GymActivities')
 
 const createGym = async (data) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
@@ -34,17 +35,31 @@ const logoutGym = async (refreshToken) => {
     // 2. Set an expiry on the blacklisted token
     // For now, we'll just return success
     return { success: true, message: "Logged out successfully" }
-  } catch (error) {
+  }
+  catch (error) {
     return false
   }
 }
 
 const getGyms = async () => {
-  return Gym.findAll()
+  return Gym.findAll({
+    include: {
+      model: GymActivities,
+    }
+  })
 }
 
 const getGym = async (id) => {
-  return Gym.findOne({ where: { id } })
+  return Gym.findOne({
+    where: { id },
+    include: {
+      model: GymActivities,
+    }
+  })
+}
+
+const getGymActivities = async (id) => {
+  return GymActivities.findAll({ where: { gymId: id }, })
 }
 
 const updateGym = async (id, data) => {
@@ -65,6 +80,7 @@ module.exports = {
   logoutGym,
   getGyms,
   getGym,
+  getGymActivities,
   updateGym,
   deleteGym,
   restoreGym,

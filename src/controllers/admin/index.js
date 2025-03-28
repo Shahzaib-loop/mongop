@@ -11,6 +11,7 @@ const {
   logoutAdmin,
   getAdmins,
   getAdmin,
+  getAdminActivities,
   updateAdmin,
   deleteAdmin,
   restoreAdmin,
@@ -108,6 +109,19 @@ const adminData = async (req, res) => {
   }
 }
 
+const adminActivities = async (req, res) => {
+  try {
+    const { id = '' } = req.params
+
+    const data = await getAdminActivities(id)
+
+    responseHandler.success(res, "Admin Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 400, "", error.message,)
+  }
+}
+
 const adminUpdate = async (req, res) => {
   try {
     const { id = '' } = req?.params
@@ -168,6 +182,7 @@ module.exports = {
   adminLogout,
   adminsData,
   adminData,
+  adminActivities,
   adminUpdate,
   adminDelete,
   adminRestore,

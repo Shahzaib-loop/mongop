@@ -6,6 +6,7 @@ const {
   adminLogout,
   adminsData,
   adminData,
+  adminActivities,
   adminUpdate,
   adminDelete,
   adminRestore,
@@ -22,6 +23,7 @@ router.post('/logout', adminLogout)
 
 router.get('/', adminsData)
 router.get('/:id', adminData)
+router.get('/activities/:id', adminActivities)
 
 router.post('/create', adminCreate)
 router.post('/update/:id', adminUpdate)

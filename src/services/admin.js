@@ -1,7 +1,8 @@
 const db = require("../models")
 const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../utils/auth')
-const Admin = db.sequelize.model('Admin');
+const Admin = db.sequelize.model('Admin')
+const AdminActivities = db.sequelize.model('AdminActivities')
 
 const createAdmin = async (data) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
@@ -38,7 +39,16 @@ const getAdmins = async () => {
 }
 
 const getAdmin = async (id) => {
-  return Admin.findOne({ where: { id } })
+  return Admin.findOne({
+    where: { id },
+    include: {
+      model: AdminActivities,
+    }
+  })
+}
+
+const getAdminActivities = async (id) => {
+  return AdminActivities.findAll({ where: { adminId: id }, })
 }
 
 const updateAdmin = async (id, data) => {
@@ -59,6 +69,7 @@ module.exports = {
   logoutAdmin,
   getAdmins,
   getAdmin,
+  getAdminActivities,
   updateAdmin,
   deleteAdmin,
   restoreAdmin,

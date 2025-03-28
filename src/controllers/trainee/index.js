@@ -11,6 +11,7 @@ const {
   logoutTrainee,
   getTrainees,
   getTrainee,
+  getTraineeActivities,
   updateTrainee,
   deleteTrainee,
   restoreTrainee,
@@ -104,6 +105,19 @@ const traineeData = async (req, res) => {
   }
 }
 
+const traineeActivities = async (req, res) => {
+  try {
+    const { id = '' } = req.params
+
+    const data = await getTraineeActivities(id)
+
+    responseHandler.success(res, "Trainee Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
 const traineeUpdate = async (req, res) => {
   try {
     const { id = '' } = req?.params
@@ -164,6 +178,8 @@ module.exports = {
   traineeLogout,
   traineesData,
   traineeData,
+  getTraineeActivities,
+  traineeActivities,
   traineeUpdate,
   traineeDelete,
   traineeRestore,

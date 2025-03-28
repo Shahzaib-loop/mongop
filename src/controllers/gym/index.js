@@ -4,17 +4,24 @@ const responseHandler = require('../../utils/responseHandler')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const Gym = db.sequelize.model('Gym')
+const Trainer = db.sequelize.model('Trainer')
+const Trainee = db.sequelize.model('Trainee')
 const GymActivities = db.sequelize.model('GymActivities')
+const TrainerActivities = db.sequelize.model('TrainerActivities')
+const TraineeActivities = db.sequelize.model('TraineeActivities')
 const {
   createGym,
   loginGym,
   logoutGym,
   getGyms,
   getGym,
+  getGymActivities,
   updateGym,
   deleteGym,
   restoreGym,
 } = require("../../services/gym")
+const { createTrainer } = require('../../services/trainer');
+const { createTrainee } = require('../../services/trainee');
 
 //  when register api hit, it will just add data & send code to email or number
 //  after verification the account will register & user will login with access & refresh tokens
@@ -47,8 +54,11 @@ const gymCreate = async (req, res) => {
 
     const gym = await createGym(req.body)
 
+    logger.info("Gym Created")
+
     await addActivity(GymActivities, gym?.id, "GYM_CREATED", "gym registered")
 
+    logger.info("Gym Activity Created")
     responseHandler.created(res, "Gym Registered successfully", gym)
   }
   catch (error) {
@@ -62,12 +72,14 @@ const gymLogin = async (req, res) => {
     const { email = '', password = '' } = req.body
 
     if (!(email && password)) {
+      logger.info(`Gym Login Failed as ${ !(email && password) ? 'email and password' : !email ? 'email' : 'password' } are empty`)
       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
     }
 
     const resp = await loginGym({ email, password })
 
     if (!(Object.keys(resp).length > 0)) {
+      logger.info(`Gym Login Failed as ${ !(email && password) ? 'email and password' : !email ? 'email' : 'password' } are empty`)
       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
     }
 
@@ -117,6 +129,19 @@ const gymData = async (req, res) => {
     const data = await getGym(id)
 
     responseHandler.success(res, "Gym Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+const gymActivities = async (req, res) => {
+  try {
+    const { id = '' } = req.params
+
+    const data = await getGymActivities(id)
+
+    responseHandler.success(res, "Gym Activities Fetched successfully", data)
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
@@ -181,23 +206,38 @@ const gymRestore = async (req, res) => {
   }
 }
 
-const addTrainer = (req, res) => {
+const addTrainer = async (req, res) => {
   try {
+    const { id = '', } = req?.params
     const { firstName, lastName, email, number, } = req?.body
 
     if (!(firstName && lastName && email && number)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    responseHandler.error(res, 500, "", "")
+    let isExisting = await uniqueCheck(Trainer, req.body, "Trainer",)
 
+    if (isExisting?.reason) {
+      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
+    }
+
+    let trainer = await createTrainer({ body: { ...req.body, gymId: id, }, })
+
+    if (!(Object.keys(trainer).length > 0)) {
+      responseHandler.error(res, 400, "", "",)
+    }
+
+    await addActivity(GymActivities, id, "GYM_ADDED_TRAINER", "gym added trainer")
+    await addActivity(TrainerActivities, trainer.id, "TRAINER_CREATED_GYM", "trainer created by gym")
+
+    responseHandler.error(res, 500, "", "")
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
   }
 }
 
-const addTrainee = (req, res) => {
+const addTrainee = async (req, res) => {
   try {
     const { firstName, lastName, email, number, } = req?.body
 
@@ -205,8 +245,11 @@ const addTrainee = (req, res) => {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    responseHandler.error(res, 500, "", "")
+    await traineeCreate()
 
+    await addActivity(GymActivities, id, "GYM_UPDATED", "gym updated")
+
+    responseHandler.error(res, 500, "", "")
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
@@ -219,6 +262,7 @@ module.exports = {
   gymLogout,
   gymsData,
   gymData,
+  gymActivities,
   gymUpdate,
   gymDelete,
   gymRestore,

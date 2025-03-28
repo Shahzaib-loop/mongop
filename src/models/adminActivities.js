@@ -9,7 +9,7 @@ const AdminActivities = sequelize.define("AdminActivities", {
     primaryKey: true,
   },
   adminId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
   },
   action: {

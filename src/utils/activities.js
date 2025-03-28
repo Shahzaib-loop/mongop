@@ -1,11 +1,13 @@
 const logger = require("./logger")
 
-const addActivity = async (model, gymId, action, activity) => {
+const addActivity = async (model, id, action, activity) => {
   try {
-    return model.create({ gymId, action, activity })
+    console.log("Add Activity Data: ", model, id, action, activity)
+
+    return model.create({ id, action, activity })
   }
   catch (err) {
-    logger.error({ message: `Error Creating Gym Activity: ${ err }` })
+    logger.error({ message: `Error Creating ${ model } Activity: ${ err }` })
   }
 }
 

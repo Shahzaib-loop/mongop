@@ -6,9 +6,12 @@ const {
   gymLogout,
   gymsData,
   gymData,
+  gymActivities,
   gymUpdate,
   gymDelete,
   gymRestore,
+  addTrainer,
+  addTrainee,
 } = require('../../controllers/gym')
 
 // for testing only
@@ -22,10 +25,14 @@ router.post('/logout', gymLogout)
 
 router.get('/', gymsData)
 router.get('/:id', gymData)
+router.get('/activities/:id', gymActivities)
 
 router.post('/create', gymCreate)
 router.post('/update/:id', gymUpdate)
 router.post('/delete/:id', gymDelete)
 router.post('/restore/:id', gymRestore)
+
+router.post('/addtrainer/:id', addTrainer)
+router.post('/addtrainee/:id', addTrainee)
 
 module.exports = router

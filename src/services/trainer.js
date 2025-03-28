@@ -1,10 +1,13 @@
 const db = require("../models")
 const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../utils/auth')
-const Trainer = db.sequelize.model('Trainer');
+const Trainer = db.sequelize.model('Trainer')
+const TrainerActivities = db.sequelize.model('TrainerActivities')
 
 const createTrainer = async (data) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10)
+  const tempPassword = 'tester'
+
+  const hashedPassword = await bcrypt.hash(data?.password ? data.password : tempPassword, 10)
 
   let trainer = await Trainer.create({ ...data, password: hashedPassword })
 
@@ -36,7 +39,16 @@ const getTrainers = async () => {
 }
 
 const getTrainer = async (id) => {
-  return Trainer.findOne({ where: { id } })
+  return Trainer.findOne({
+    where: { id },
+    include: {
+      model: TrainerActivities,
+    }
+  })
+}
+
+const getTrainerActivities = async (id) => {
+  return TrainerActivities.findAll({ where: { trainerId: id }, })
 }
 
 const updateTrainer = async (id, data) => {
@@ -57,6 +69,7 @@ module.exports = {
   logoutTrainer,
   getTrainers,
   getTrainer,
+  getTrainerActivities,
   updateTrainer,
   deleteTrainer,
   restoreTrainer,

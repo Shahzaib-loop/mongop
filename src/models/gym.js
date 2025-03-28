@@ -8,6 +8,10 @@ const Gym = sequelize.define("Gym", {
     allowNull: false,
     primaryKey: true,
   },
+  // gymAdminId: {
+  //   type: DataTypes.UUID,
+  //   allowNull: false,
+  // },
   role: {
     type: DataTypes.STRING,
     defaultValue: "gym",
