@@ -56,7 +56,7 @@ const gymCreate = async (req, res) => {
 
     logger.info("Gym Created")
 
-    await addActivity(GymActivities, gym?.id, "GYM_CREATED", "gym registered")
+    await addActivity(GymActivities, 'gymId', gym?.id, "GYM_CREATED", "gym registered")
 
     logger.info("Gym Activity Created")
     responseHandler.created(res, "Gym Registered successfully", gym)
@@ -159,7 +159,7 @@ const gymUpdate = async (req, res) => {
 
     await updateGym(id, rest)
 
-    await addActivity(GymActivities, id, "GYM_UPDATED", "gym updated")
+    await addActivity(GymActivities, 'gymId', id, "GYM_UPDATED", "gym updated")
 
     responseHandler.success(res, "Gym Updated successfully")
   }
@@ -211,6 +211,9 @@ const addTrainer = async (req, res) => {
     const { id = '', } = req?.params
     const { firstName, lastName, email, number, } = req?.body
 
+    // console.log(req.params, 'params tttttttttttttt')
+    // console.log(req.body, 'body tttttttttttttt')
+
     if (!(firstName && lastName && email && number)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
@@ -221,14 +224,18 @@ const addTrainer = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let trainer = await createTrainer({ body: { ...req.body, gymId: id, }, })
+    let trainer = await createTrainer({ ...req.body, gymId: id, })
 
     if (!(Object.keys(trainer).length > 0)) {
       responseHandler.error(res, 400, "", "",)
     }
 
-    await addActivity(GymActivities, id, "GYM_ADDED_TRAINER", "gym added trainer")
-    await addActivity(TrainerActivities, trainer.id, "TRAINER_CREATED_GYM", "trainer created by gym")
+    console.log(id, 'id tttttttttttttt')
+    console.log(trainer.id, 'trainer tttttttttttttt')
+
+    // await addActivity({ GymActivities, gymId: id, action: "GYM_ADDED_TRAINER", activity: "gym added trainer" })
+    await addActivity(GymActivities, { gymId: id }, "GYM_ADDED_TRAINER", "gym added trainer")
+    await addActivity(TrainerActivities, trainer.id, "TRAINER_CREATED_BY_GYM", "trainer created by gym")
 
     responseHandler.error(res, 500, "", "")
   }

@@ -15,7 +15,7 @@ const uniqueCheck = async (model, data = {}, roleType = '',) => {
     raw: true
   })
 
-  console.log("[middleware] Unique Check Record: ", record)
+  console.log("middlewareResponse: Unique Check Record: ", record)
 
   if (record) {
     return {
