@@ -4,14 +4,6 @@ const { generateTokens } = require('../utils/auth')
 const Trainee = db.sequelize.model('Trainee')
 const TraineeActivities = db.sequelize.model('TraineeActivities')
 
-const createTrainee = async (data) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10)
-
-  let trainee = await Trainee.create({ ...data, password: hashedPassword })
-
-  return trainee
-}
-
 const loginTrainee = async ({ email, password }) => {
   const trainee = await Trainee.findOne({ where: { email }, raw: true })
 
@@ -32,6 +24,10 @@ const logoutTrainee = async (email) => {
   return email
 }
 
+const getTraineeActivities = async (id) => {
+  return TraineeActivities.findAll({ where: { traineeId: id }, })
+}
+
 const getTrainees = async () => {
   return Trainee.findAll()
 }
@@ -45,8 +41,14 @@ const getTrainee = async (id) => {
   })
 }
 
-const getTraineeActivities = async (id) => {
-  return TraineeActivities.findAll({ where: { traineeId: id }, })
+const createTrainee = async (data) => {
+  const tempPassword = 'tester'
+
+  const hashedPassword = await bcrypt.hash(data?.password ? data.password : tempPassword, 10)
+
+  let trainer = await Trainee.create({ ...data, password: hashedPassword })
+
+  return trainer
 }
 
 const updateTrainee = async (id, data) => {
@@ -61,6 +63,23 @@ const restoreTrainee = async (id) => {
   return Trainee.update({ deleted: false }, { where: { id } })
 }
 
+// =======>>> Trainer Notes
+const getTraineeNote = async () => {
+
+}
+
+const createTraineeNote = async () => {
+
+}
+
+const updateTraineeNote = async () => {
+
+}
+
+const deleteTraineeNote = async () => {
+
+}
+
 module.exports = {
   createTrainee,
   loginTrainee,
@@ -71,4 +90,9 @@ module.exports = {
   updateTrainee,
   deleteTrainee,
   restoreTrainee,
+
+  getTraineeNote,
+  createTraineeNote,
+  updateTraineeNote,
+  deleteTraineeNote,
 }

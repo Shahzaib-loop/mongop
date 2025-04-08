@@ -4,16 +4,6 @@ const { generateTokens } = require('../utils/auth')
 const Trainer = db.sequelize.model('Trainer')
 const TrainerActivities = db.sequelize.model('TrainerActivities')
 
-const createTrainer = async (data) => {
-  const tempPassword = 'tester'
-
-  const hashedPassword = await bcrypt.hash(data?.password ? data.password : tempPassword, 10)
-
-  let trainer = await Trainer.create({ ...data, password: hashedPassword })
-
-  return trainer
-}
-
 const loginTrainer = async ({ email, password }) => {
   const trainer = await Trainer.findOne({ where: { email }, raw: true })
 
@@ -34,6 +24,10 @@ const logoutTrainer = async (email) => {
   return email
 }
 
+const getTrainerActivities = async (id) => {
+  return TrainerActivities.findAll({ where: { trainerId: id }, })
+}
+
 const getTrainers = async () => {
   return Trainer.findAll()
 }
@@ -47,8 +41,14 @@ const getTrainer = async (id) => {
   })
 }
 
-const getTrainerActivities = async (id) => {
-  return TrainerActivities.findAll({ where: { trainerId: id }, })
+const createTrainer = async (data, t) => {
+  const tempPassword = 'tester'
+
+  const hashedPassword = await bcrypt.hash(data?.password ? data.password : tempPassword, 10)
+
+  let trainer = await Trainer.create({ ...data, password: hashedPassword }, { transaction: t })
+
+  return trainer
 }
 
 const updateTrainer = async (id, data) => {
@@ -63,6 +63,38 @@ const restoreTrainer = async () => {
   return Trainer.update({ deleted: false }, { where: { id } })
 }
 
+const getTraineeWorkout = async () => {
+
+}
+
+const createTraineeWorkout = async () => {
+
+}
+
+const updateTraineeWorkout = async () => {
+
+}
+
+const deleteTraineeWorkout = async () => {
+
+}
+
+const getTrainerNote = async () => {
+
+}
+
+const createTrainerNote = async () => {
+
+}
+
+const updateTrainerNote = async () => {
+
+}
+
+const deleteTrainerNote = async () => {
+
+}
+
 module.exports = {
   createTrainer,
   loginTrainer,
@@ -73,4 +105,14 @@ module.exports = {
   updateTrainer,
   deleteTrainer,
   restoreTrainer,
+
+  getTraineeWorkout,
+  createTraineeWorkout,
+  updateTraineeWorkout,
+  deleteTraineeWorkout,
+
+  getTrainerNote,
+  createTrainerNote,
+  updateTrainerNote,
+  deleteTrainerNote,
 }

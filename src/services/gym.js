@@ -2,12 +2,14 @@ const db = require("../models")
 const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../utils/auth')
 const Gym = db.sequelize.model('Gym')
+const Trainee = db.sequelize.model('Trainee')
+const Trainer = db.sequelize.model('Trainer')
 const GymActivities = db.sequelize.model('GymActivities')
 
-const createGym = async (data) => {
+const createGym = async (data, t) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
 
-  let gym = await Gym.create({ ...data, password: hashedPassword })
+  let gym = await Gym.create({ ...data, password: hashedPassword }, { transaction: t })
 
   return gym
 }
@@ -43,18 +45,40 @@ const logoutGym = async (refreshToken) => {
 
 const getGyms = async () => {
   return Gym.findAll({
-    include: {
-      model: GymActivities,
-    }
+    include: [
+      {
+        model: GymActivities,
+        as: 'gymActivities'
+      },
+      {
+        model: Trainee,
+        as: 'gymTrainee'
+      },
+      {
+        model: Trainer,
+        as: 'gymTrainer'
+      },
+    ]
   })
 }
 
 const getGym = async (id) => {
   return Gym.findOne({
     where: { id },
-    include: {
-      model: GymActivities,
-    }
+    include: [
+      {
+        model: GymActivities,
+        as: 'gymActivities'
+      },
+      {
+        model: Trainee,
+        as: 'gymTrainee'
+      },
+      {
+        model: Trainer,
+        as: 'gymTrainer'
+      },
+    ]
   })
 }
 

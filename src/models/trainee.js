@@ -8,6 +8,10 @@ const Trainee = sequelize.define("Trainee", {
     allowNull: false,
     primaryKey: true,
   },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "admin",
+  },
   firstName: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -23,29 +27,25 @@ const Trainee = sequelize.define("Trainee", {
       isEmail: true,
     },
   },
+  number: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isNumeric: true,
+    },
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  role: {
-    type: DataTypes.STRING,
-    defaultValue: "admin",
-  },
   gymId: {
     type: DataTypes.UUID,
-    allowNull: false,
-    // references: {
-    //   model: Gym,
-    //   key: 'id',
-    // },
+    allowNull: true,
   },
   trainerId: {
     type: DataTypes.UUID,
-    allowNull: false,
-    // references: {
-    //   model: Trainer,
-    //   key: 'id',
-    // },
+    allowNull: true,
   },
   deleted: {
     type: DataTypes.BOOLEAN,

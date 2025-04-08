@@ -15,41 +15,15 @@ const {
   updateTrainer,
   deleteTrainer,
   restoreTrainer,
+  getTraineeWorkout,
+  createTraineeWorkout,
+  updateTraineeWorkout,
+  deleteTraineeWorkout,
+  getTrainerNote,
+  createTrainerNote,
+  updateTrainerNote,
+  deleteTrainerNote,
 } = require("../../services/trainer")
-
-const trainerCreate = async (req, res) => {
-  try {
-    const tempPassword = 'tester123'
-    const {
-      firstName = '',
-      lastName = '',
-      email = '',
-      number = '',
-      password = '',
-    } = req?.body
-
-    if (!(firstName && lastName && email && number && password)) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "required fields are empty or invalid")
-    }
-
-    let isExisting = await uniqueCheck(Trainer, req.body, "Trainee",)
-
-    if (isExisting?.reason) {
-      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
-    }
-
-    let trainer = await createTrainer({ ...req.body, password: password ? password : tempPassword })
-    trainer = await trainer.toJSON()
-
-    await addActivity(TrainerActivities, trainer?.id, "TRAINER_CREATED", "trainer registered")
-
-    responseHandler.created(res, "Trainer registered successfully", trainer)
-  }
-  catch (error) {
-    logger.error(`${ error }`)
-    responseHandler.error(res, 500, "", error.message,)
-  }
-}
 
 const trainerLogin = async (req, res) => {
   try {
@@ -83,6 +57,19 @@ const trainerLogout = async (req, res) => {
   }
 }
 
+const trainerActivities = async (req, res) => {
+  try {
+    const { id = '' } = req.params
+
+    const data = await getTrainerActivities(id)
+
+    responseHandler.success(res, "Trainer Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
 const trainersData = async (req, res) => {
   try {
     const data = await getTrainers()
@@ -107,15 +94,36 @@ const trainerData = async (req, res) => {
   }
 }
 
-const trainerActivities = async (req, res) => {
+const trainerCreate = async (req, res) => {
   try {
-    const { id = '' } = req.params
+    const tempPassword = 'tester123'
+    const {
+      firstName = '',
+      lastName = '',
+      email = '',
+      number = '',
+      password = '',
+    } = req?.body
 
-    const data = await getTrainerActivities(id)
+    if (!(firstName && lastName && email && number && password)) {
+      return responseHandler.error(res, 400, "Required Fields are Invalid", "required fields are empty or invalid")
+    }
 
-    responseHandler.success(res, "Trainer Data Fetched successfully", data)
+    let isExisting = await uniqueCheck(Trainer, req.body, "Trainee",)
+
+    if (isExisting?.reason) {
+      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
+    }
+
+    let trainer = await createTrainer({ ...req.body, password: password ? password : tempPassword })
+    trainer = await trainer.toJSON()
+
+    await addActivity(TrainerActivities, trainer?.id, "TRAINER_CREATED", "trainer registered")
+
+    responseHandler.created(res, "Trainer registered successfully", trainer)
   }
   catch (error) {
+    logger.error(`${ error }`)
     responseHandler.error(res, 500, "", error.message,)
   }
 }
@@ -174,6 +182,68 @@ const trainerRestore = async (req, res) => {
   }
 }
 
+// =======>>> Workout for Trainee by Trainer
+const traineeWorkoutData = async (req, res) => {
+}
+
+const traineeWorkoutCreate = async (req, res) => {
+}
+
+const traineeWorkoutUpdate = async (req, res) => {
+}
+
+const traineeWorkoutDelete = async (req, res) => {
+}
+
+// =======>>> Trainer Notes
+const trainerNoteData = async (req, res) => {
+  try {
+    // iski zarorat shayad na paray kunke jab workout get hoon gat to join se ye notes sath ain gay hr workout ke
+
+    const { id } = req.params //  workoutId
+
+    // workoutId ke against saved note le ay ga
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
+const trainerNoteCreate = async (req, res) => {
+  try {
+    const { id } = req.params //  workoutId
+    const { trainerId, description } = req.body // trainerId
+
+    // workout ke against note save hoga or traineeId params se mil rhi hogi as traineeNotes
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
+const trainerNoteUpdate = async (req, res) => {
+  try {
+    const { id } = req.params //  noteId
+    const { trainerId, ...rest } = req.body // trainerId remove krni ha, cant be updated
+
+    // noteId ke against note save hoga
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
+const trainerNoteDelete = async (req, res) => {
+  try {
+    const { id } = req.params //  noteId
+
+    // noteId ke against note delete hoga
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
 module.exports = {
   trainerCreate,
   trainerLogin,
@@ -184,4 +254,14 @@ module.exports = {
   trainerUpdate,
   trainerDelete,
   trainerRestore,
+
+  traineeWorkoutData,
+  traineeWorkoutCreate,
+  traineeWorkoutUpdate,
+  traineeWorkoutDelete,
+
+  trainerNoteData,
+  trainerNoteCreate,
+  trainerNoteUpdate,
+  trainerNoteDelete,
 }

@@ -8,6 +8,14 @@ const Trainer = sequelize.define("Trainer", {
     allowNull: false,
     primaryKey: true,
   },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "trainer",
+  },
+  trainerType:{
+    type: DataTypes.STRING,
+    defaultValue: "non-default",
+  },
   firstName: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -35,17 +43,9 @@ const Trainer = sequelize.define("Trainer", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  role: {
-    type: DataTypes.STRING,
-    defaultValue: "trainer",
-  },
   gymId: {
     type: DataTypes.UUID,
-    allowNull: false,
-    // references: {
-    //   model: Gym,
-    //   key: 'id',
-    // },
+    allowNull: true,
   },
   deleted: {
     type: DataTypes.BOOLEAN,

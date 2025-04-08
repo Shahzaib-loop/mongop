@@ -15,39 +15,11 @@ const {
   updateTrainee,
   deleteTrainee,
   restoreTrainee,
+  getTraineeNote,
+  createTraineeNote,
+  updateTraineeNote,
+  deleteTraineeNote,
 } = require("../../services/trainee")
-
-const traineeCreate = async (req, res) => {
-  try {
-    const {
-      firstName = '',
-      lastName = '',
-      email = '',
-      number = '',
-      password = '',
-    } = req?.body
-
-    if (!(firstName && lastName && email && number && password)) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "required fields are empty or invalid")
-    }
-
-    let isExisting = await uniqueCheck(Trainee, req.body, "Trainee",)
-
-    if (isExisting?.reason) {
-      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
-    }
-
-    const trainee = await createTrainee(req.body)
-
-    await addActivity(TraineeActivities, trainee?.id, "TRAINEE_CREATED", "trainee registered")
-
-    responseHandler.created(res, "Trainee registered successfully", trainee)
-  }
-  catch (error) {
-    logger.error(`${ error }`)
-    responseHandler.error(res, 500, "", error.message,)
-  }
-}
 
 const traineeLogin = async (req, res) => {
   try {
@@ -81,6 +53,19 @@ const traineeLogout = async (req, res) => {
   }
 }
 
+const traineeActivities = async (req, res) => {
+  try {
+    const { id = '' } = req.params
+
+    const data = await getTraineeActivities(id)
+
+    responseHandler.success(res, "Trainee Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
 const traineesData = async (req, res) => {
   try {
     const data = await getTrainees()
@@ -105,15 +90,34 @@ const traineeData = async (req, res) => {
   }
 }
 
-const traineeActivities = async (req, res) => {
+const traineeCreate = async (req, res) => {
   try {
-    const { id = '' } = req.params
+    const {
+      firstName = '',
+      lastName = '',
+      email = '',
+      number = '',
+      password = '',
+    } = req?.body
 
-    const data = await getTraineeActivities(id)
+    if (!(firstName && lastName && email && number && password)) {
+      return responseHandler.error(res, 400, "Required Fields are Invalid", "required fields are empty or invalid")
+    }
 
-    responseHandler.success(res, "Trainee Data Fetched successfully", data)
+    let isExisting = await uniqueCheck(Trainee, req.body, "Trainee",)
+
+    if (isExisting?.reason) {
+      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
+    }
+
+    const trainee = await createTrainee(req.body)
+
+    await addActivity(TraineeActivities, trainee?.id, "TRAINEE_CREATED", "trainee registered")
+
+    responseHandler.created(res, "Trainee registered successfully", trainee)
   }
   catch (error) {
+    logger.error(`${ error }`)
     responseHandler.error(res, 500, "", error.message,)
   }
 }
@@ -172,6 +176,54 @@ const traineeRestore = async (req, res) => {
   }
 }
 
+const traineeNoteData = async (req, res) => {
+  try {
+    // iski zarorat shayad na paray kunke jab workout get hoon gat to join se ye notes sath ain gay hr workout ke
+
+    const { id } = req.params //  workoutId
+
+    // workoutId ke against saved note le ay ga
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
+const traineeNoteCreate = async (req, res) => {
+  try {
+    const { id } = req.params //  workoutId
+    const { traineeId, description } = req.body // traineeId
+
+    // workout ke against note save hoga or traineeId params se mil rhi hogi as traineeNotes
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
+const traineeNoteUpdate = async (req, res) => {
+  try {
+    const { id } = req.params //  noteId
+    const { traineeId, ...rest } = req.body // traineeId remove krni ha, cant be updated
+
+    // noteId ke against note save hoga
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
+const traineeNoteDelete = async (req, res) => {
+  try {
+    const { id } = req.params //  noteId
+
+    // noteId ke against note delete hoga
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
 module.exports = {
   traineeCreate,
   traineeLogin,
@@ -183,4 +235,9 @@ module.exports = {
   traineeUpdate,
   traineeDelete,
   traineeRestore,
+
+  traineeNoteData,
+  traineeNoteCreate,
+  traineeNoteUpdate,
+  traineeNoteDelete,
 }

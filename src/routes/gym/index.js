@@ -10,8 +10,8 @@ const {
   gymUpdate,
   gymDelete,
   gymRestore,
-  addTrainer,
-  addTrainee,
+  addGymTrainer,
+  addGymTrainee,
 } = require('../../controllers/gym')
 
 // for testing only
@@ -32,7 +32,7 @@ router.post('/update/:id', gymUpdate)
 router.post('/delete/:id', gymDelete)
 router.post('/restore/:id', gymRestore)
 
-router.post('/addtrainer/:id', addTrainer)
-router.post('/addtrainee/:id', addTrainee)
+router.post('/addtrainer/:id', addGymTrainer)
+router.post('/addtrainee/:id', addGymTrainee)
 
 module.exports = router

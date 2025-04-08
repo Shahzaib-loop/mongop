@@ -1,14 +1,14 @@
 const logger = require("./logger")
 
-const addActivity = async (model, idField, idValue, action, activity) => {
-  try {
+const addActivity = async (model, idField, idValue, action, activity, t) => {
+  // try {
     console.log("Add Activity Data: ", model, idField, idValue, action, activity)
 
-    return model.create({ [idField]: idValue, action, activity })
-  }
-  catch (err) {
-    logger.error({ message: `Error Creating ${ model } Activity: ${ err }` })
-  }
+    return model.create({ [idField]: idValue, action, activity }, { transaction: t })
+  // }
+  // catch (err) {
+  //   logger.error({ message: `Error Creating ${ model } Activity: ${ err }` })
+  // }
 }
 
 // const addActivity = async (model, id, action, activity) => {
