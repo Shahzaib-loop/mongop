@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
 
-const Gym = sequelize.define("Gym", {
+const gyms = sequelize.define("gyms", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -77,4 +77,4 @@ const Gym = sequelize.define("Gym", {
   },
 })
 
-module.exports = Gym
+module.exports = gyms

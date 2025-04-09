@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
 
-const Trainee = sequelize.define("Trainee", {
+const trainees = sequelize.define("trainees", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -10,7 +10,7 @@ const Trainee = sequelize.define("Trainee", {
   },
   role: {
     type: DataTypes.STRING,
-    defaultValue: "admin",
+    defaultValue: "trainee",
   },
   firstName: {
     type: DataTypes.STRING,
@@ -61,4 +61,4 @@ const Trainee = sequelize.define("Trainee", {
   },
 })
 
-module.exports = Trainee
+module.exports = trainees

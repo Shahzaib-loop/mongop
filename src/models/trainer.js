@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
 
-const Trainer = sequelize.define("Trainer", {
+const trainers = sequelize.define("trainers", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -61,4 +61,4 @@ const Trainer = sequelize.define("Trainer", {
   },
 })
 
-module.exports = Trainer
+module.exports = trainers

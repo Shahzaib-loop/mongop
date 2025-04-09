@@ -1,8 +1,8 @@
-const db = require("../models")
+const db = require("../../models")
 const bcrypt = require("bcryptjs")
-const { generateTokens } = require('../utils/auth')
-const Trainer = db.sequelize.model('Trainer')
-const TrainerActivities = db.sequelize.model('TrainerActivities')
+const { generateTokens } = require('../../utils/auth')
+const Trainer = db.sequelize.model('trainers')
+const TrainerActivities = db.sequelize.model('trainer_activities')
 
 const loginTrainer = async ({ email, password }) => {
   const trainer = await Trainer.findOne({ where: { email }, raw: true })
@@ -63,38 +63,6 @@ const restoreTrainer = async () => {
   return Trainer.update({ deleted: false }, { where: { id } })
 }
 
-const getTraineeWorkout = async () => {
-
-}
-
-const createTraineeWorkout = async () => {
-
-}
-
-const updateTraineeWorkout = async () => {
-
-}
-
-const deleteTraineeWorkout = async () => {
-
-}
-
-const getTrainerNote = async () => {
-
-}
-
-const createTrainerNote = async () => {
-
-}
-
-const updateTrainerNote = async () => {
-
-}
-
-const deleteTrainerNote = async () => {
-
-}
-
 module.exports = {
   createTrainer,
   loginTrainer,
@@ -105,14 +73,4 @@ module.exports = {
   updateTrainer,
   deleteTrainer,
   restoreTrainer,
-
-  getTraineeWorkout,
-  createTraineeWorkout,
-  updateTraineeWorkout,
-  deleteTraineeWorkout,
-
-  getTrainerNote,
-  createTrainerNote,
-  updateTrainerNote,
-  deleteTrainerNote,
 }

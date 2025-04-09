@@ -8,15 +8,15 @@ function checkRouteAccess(requestType) {
     //   && req.user.privileges.find(row => row.moduleRoute === 'contacts').modulePermissions
     //   && typeof req.user.privileges.find(row => row.moduleRoute === 'contacts').modulePermissions === "string"
     //   && req.user.privileges.find(row => row.moduleRoute === 'contacts').modulePermissions.split(',').map(row => parseInt(row)).includes(requestType))
-    //   next();
+    //   next()
     // else
     //   res.status(401).json({
     //     error: {
     //       message: 'Access Denied!',
     //       reason: 'No Permission on Current Route!'
     //     }
-    //   });
+    //   })
   }
 }
 
-module.exports = checkRouteAccess;
+module.exports = checkRouteAccess

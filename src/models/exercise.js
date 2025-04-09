@@ -1,24 +1,20 @@
-const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
+const { DataTypes } = require("sequelize")
 
-const gym_activities = sequelize.define("gym_activities", {
+const exercise_types = sequelize.define("exercise_types", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     primaryKey: true,
   },
-  gymId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-  action: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  activity: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -30,4 +26,4 @@ const gym_activities = sequelize.define("gym_activities", {
   },
 })
 
-module.exports = gym_activities
+module.exports = exercise_types

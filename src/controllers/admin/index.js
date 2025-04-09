@@ -2,9 +2,9 @@ const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require("../../utils/responseHandler")
 const { uniqueCheck } = require("../../utils/uniqueCheck")
-const { addActivity } = require('../../utils/activities');
-const Admin = db.sequelize.model('Admin')
-const AdminActivities = db.sequelize.model('AdminActivities')
+const { addActivity } = require('../../utils/activities')
+const Admin = db.sequelize.model('admins')
+const AdminActivities = db.sequelize.model('admin_activities')
 const {
   createAdmin,
   loginAdmin,
@@ -33,7 +33,7 @@ const adminCreate = async (req, res) => {
 
     console.log(req.body, 'user 000000 lllllllllllllllll')
 
-    let isExisting = await uniqueCheck(Admin, req.body, "Admin")
+    let isExisting = await uniqueCheck(Admin, req.body, "admin")
 
     console.log(isExisting, 'user 111111 lllllllllllllllll')
 

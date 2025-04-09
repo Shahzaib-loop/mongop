@@ -1,24 +1,32 @@
-const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
+const { DataTypes } = require("sequelize")
 
-const gym_activities = sequelize.define("gym_activities", {
+const trainee_progress = sequelize.define("trainee_progress", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     primaryKey: true,
   },
-  gymId: {
+  traineeId: {
     type: DataTypes.UUID,
     allowNull: false,
   },
-  action: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  date: {
+    type: DataTypes.DATE
   },
-  activity: {
+  completedSets: {
+    type: DataTypes.INTEGER,
+  },
+  completedReps: {
+    type: DataTypes.INTEGER,
+  },
+  feedback: {
     type: DataTypes.STRING,
-    allowNull: false,
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -30,4 +38,4 @@ const gym_activities = sequelize.define("gym_activities", {
   },
 })
 
-module.exports = gym_activities
+module.exports = trainee_progress

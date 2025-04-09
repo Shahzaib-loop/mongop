@@ -8,12 +8,12 @@ connectDB()
 
 // app.get("/", async (req, res) => {
 //   try {
-//     const result = await pool.query("SELECT NOW()");
-//     res.json({ message: "PostgreSQL connected!", time: result.rows[0] });
+//     const result = await pool.query("SELECT NOW()")
+//     res.json({ message: "PostgreSQL connected!", time: result.rows[0] })
 //   } catch (err) {
-//     res.status(500).json({ error: err.message });
+//     res.status(500).json({ error: err.message })
 //   }
-// });
+// })
 
 const PORT = normalizePort('5000')
 

@@ -1,8 +1,8 @@
-const db = require("../models")
+const db = require("../../models")
 const bcrypt = require("bcryptjs")
-const { generateTokens } = require('../utils/auth')
-const Admin = db.sequelize.model('Admin')
-const AdminActivities = db.sequelize.model('AdminActivities')
+const { generateTokens } = require('../../utils/auth')
+const Admin = db.sequelize.model('admins')
+const AdminActivities = db.sequelize.model('admin_activities')
 
 const createAdmin = async (data) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)

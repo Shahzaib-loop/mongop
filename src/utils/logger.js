@@ -1,5 +1,5 @@
 const winston = require("winston")
-const moment = require('moment');
+const moment = require('moment')
 
 const colors = {
   error: "red",

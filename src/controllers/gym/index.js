@@ -1,12 +1,4 @@
 const {
-  addGymTrainer,
-  updateGymTrainer,
-  deleteGymTrainer,
-  addGymTrainee,
-  updateGymTrainee,
-  deleteGymTrainee,
-} = require('./gymTrainerAndTrainee')
-const {
   gymCreate,
   gymLogin,
   gymLogout,
@@ -17,6 +9,16 @@ const {
   gymDelete,
   gymRestore,
 } = require("./gym")
+const {
+  addGymTrainer,
+  updateGymTrainer,
+  deleteGymTrainer,
+} = require('./gymTrainer')
+const {
+  addGymTrainee,
+  updateGymTrainee,
+  deleteGymTrainee,
+} = require('./gymTrainee')
 
 module.exports = {
   gymCreate,

@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require("sequelize")
 
 const uniqueCheck = async (model, data = {}, roleType = '',) => {
   let numValue = data['number']

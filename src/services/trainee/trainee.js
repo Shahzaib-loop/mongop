@@ -1,8 +1,8 @@
-const db = require("../models")
+const db = require("../../models")
 const bcrypt = require("bcryptjs")
-const { generateTokens } = require('../utils/auth')
-const Trainee = db.sequelize.model('Trainee')
-const TraineeActivities = db.sequelize.model('TraineeActivities')
+const { generateTokens } = require('../../utils/auth')
+const Trainee = db.sequelize.model('trainees')
+const TraineeActivities = db.sequelize.model('trainee_activities')
 
 const loginTrainee = async ({ email, password }) => {
   const trainee = await Trainee.findOne({ where: { email }, raw: true })
@@ -63,23 +63,6 @@ const restoreTrainee = async (id) => {
   return Trainee.update({ deleted: false }, { where: { id } })
 }
 
-// =======>>> Trainer Notes
-const getTraineeNote = async () => {
-
-}
-
-const createTraineeNote = async () => {
-
-}
-
-const updateTraineeNote = async () => {
-
-}
-
-const deleteTraineeNote = async () => {
-
-}
-
 module.exports = {
   createTrainee,
   loginTrainee,
@@ -90,9 +73,4 @@ module.exports = {
   updateTrainee,
   deleteTrainee,
   restoreTrainee,
-
-  getTraineeNote,
-  createTraineeNote,
-  updateTraineeNote,
-  deleteTraineeNote,
 }

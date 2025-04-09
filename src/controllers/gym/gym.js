@@ -1,12 +1,12 @@
 const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
-const Gym = db.sequelize.model('Gym')
-const GymActivities = db.sequelize.model('GymActivities')
-const TrainerActivities = db.sequelize.model('TrainerActivities')
+const Gym = db.sequelize.model('gyms')
+const GymActivities = db.sequelize.model('gym_activities')
+const TrainerActivities = db.sequelize.model('trainer_activities')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
-const { createTrainer } = require('../../services/trainer')
+const { createTrainer } = require('../../services/trainer/trainer')
 const {
   createGym,
   loginGym,
@@ -101,7 +101,7 @@ const gymLogin = async (req, res) => {
 
 const gymLogout = async (req, res) => {
   try {
-    const { refreshToken } = req.body
+    const { refreshToken = '' } = req.body
 
     if (!refreshToken) {
       return responseHandler.error(

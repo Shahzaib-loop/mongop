@@ -1,10 +1,10 @@
-const db = require("../models")
+const db = require("../../models")
 const bcrypt = require("bcryptjs")
-const { generateTokens } = require('../utils/auth')
-const Gym = db.sequelize.model('Gym')
-const Trainee = db.sequelize.model('Trainee')
-const Trainer = db.sequelize.model('Trainer')
-const GymActivities = db.sequelize.model('GymActivities')
+const { generateTokens } = require('../../utils/auth')
+const Gym = db.sequelize.model('gyms')
+const Trainee = db.sequelize.model('trainees')
+const Trainer = db.sequelize.model('trainers')
+const GymActivities = db.sequelize.model('gym_activities')
 
 const createGym = async (data, t) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
