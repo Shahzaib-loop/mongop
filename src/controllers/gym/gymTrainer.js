@@ -1,12 +1,13 @@
 const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
+const bcrypt = require('bcryptjs');
 const Trainer = db.sequelize.model('trainers')
-const GymActivities = db.sequelize.model('gym_activities')
-const TrainerActivities = db.sequelize.model('trainer_activities')
+// const GymActivities = db.sequelize.model('gym_activities')
+// const TrainerActivities = db.sequelize.model('trainer_activities')
 const { uniqueCheck } = require('../../utils/uniqueCheck')
 const { addActivity } = require('../../utils/activities')
-const { createTrainer } = require('../../services/trainer')
+const { createTrainer } = require('../../services/trainer/trainer')
 
 const addGymTrainer = async (req, res) => {
   try {
@@ -23,26 +24,29 @@ const addGymTrainer = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let trainer = await createTrainer({ ...req.body, gymId: id, })
+    const tempPassword = 'tester'
+    const hashedPassword = await bcrypt.hash(tempPassword, 10)
+
+    let trainer = await createTrainer({ ...req.body, gymId: id, trainerType: 'non_default', password: hashedPassword })
 
     if (!(Object.keys(trainer).length > 0)) {
       responseHandler.error(res, 400, "", "",)
     }
 
-    await addActivity(
-      GymActivities,
-      'gymId',
-      id,
-      "GYM_ADDED_TRAINER",
-      "gym added trainer"
-    )
-    await addActivity(
-      TrainerActivities,
-      'trainerId',
-      trainer.id,
-      "TRAINER_CREATED_BY_GYM",
-      "trainer created by gym"
-    )
+    // await addActivity(
+    //   GymActivities,
+    //   'gymId',
+    //   id,
+    //   "GYM_ADDED_TRAINER",
+    //   "gym added trainer"
+    // )
+    // await addActivity(
+    //   TrainerActivities,
+    //   'trainerId',
+    //   trainer.id,
+    //   "TRAINER_CREATED_BY_GYM",
+    //   "trainer created by gym"
+    // )
 
     responseHandler.success(res, "Trainer Created Successfully", trainer)
   }

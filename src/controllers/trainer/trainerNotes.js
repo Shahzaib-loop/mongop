@@ -2,19 +2,19 @@ const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
 const { addActivity } = require("../../utils/activities")
-const TrainerActivities = db.sequelize.model('trainer_activities')
+// const TrainerActivities = db.sequelize.model('trainer_activities')
 const {
   getTrainerNote,
   createTrainerNote,
   updateTrainerNote,
   deleteTrainerNote,
-} = require("../../services/trainer")
+} = require("../../services/trainer/trainerNotes")
 
 const trainerNoteData = async (req, res) => {
   try {
     // iski zarorat shayad na paray kunke jab workout get hoon gat to join se ye notes sath ain gay hr workout ke
 
-    const { id } = req.params //  workoutId
+    const { id } = req?.params //  workoutId
 
     // workoutId ke against saved note le ay ga
   }
@@ -25,8 +25,8 @@ const trainerNoteData = async (req, res) => {
 
 const trainerNoteCreate = async (req, res) => {
   try {
-    const { id } = req.params //  workoutId
-    const { trainerId, description } = req.body // trainerId
+    const { id } = req?.params //  workoutId
+    const { trainerId, description } = req?.body // trainerId
 
     // workout ke against note save hoga or traineeId params se mil rhi hogi as traineeNotes
   }
@@ -37,8 +37,8 @@ const trainerNoteCreate = async (req, res) => {
 
 const trainerNoteUpdate = async (req, res) => {
   try {
-    const { id } = req.params //  noteId
-    const { trainerId, ...rest } = req.body // trainerId remove krni ha, cant be updated
+    const { id } = req?.params //  noteId
+    const { trainerId, ...rest } = req?.body // trainerId remove krni ha, cant be updated
 
     // noteId ke against note save hoga
   }
@@ -49,7 +49,7 @@ const trainerNoteUpdate = async (req, res) => {
 
 const trainerNoteDelete = async (req, res) => {
   try {
-    const { id } = req.params //  noteId
+    const { id } = req?.params //  noteId
 
     // noteId ke against note delete hoga
   }

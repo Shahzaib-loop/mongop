@@ -1,6 +1,6 @@
 const db = require("../../models")
 const Trainer = db.sequelize.model('trainers')
-const TrainerNotes = db.sequelize.model('trainer_notes')
+// const TrainerNotes = db.sequelize.model('trainer_notes')
 
 const getTrainerNote = async () => {
 

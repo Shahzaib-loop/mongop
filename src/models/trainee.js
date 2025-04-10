@@ -12,6 +12,14 @@ const trainees = sequelize.define("trainees", {
     type: DataTypes.STRING,
     defaultValue: "trainee",
   },
+  gymId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  trainerId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
   firstName: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -38,14 +46,6 @@ const trainees = sequelize.define("trainees", {
   password: {
     type: DataTypes.STRING,
     allowNull: false,
-  },
-  gymId: {
-    type: DataTypes.UUID,
-    allowNull: true,
-  },
-  trainerId: {
-    type: DataTypes.UUID,
-    allowNull: true,
   },
   deleted: {
     type: DataTypes.BOOLEAN,

@@ -10,26 +10,34 @@ const {
   trainerUpdate,
   trainerDelete,
   trainerRestore,
-  trainerTraineeData,
-  trainerTraineeCreate,
-  trainerTraineeUpdate,
-  trainerTraineeDelete,
+} = require('../../controllers/trainer/trainer')
+const {
   traineeWorkoutData,
   traineeWorkoutCreate,
   traineeWorkoutUpdate,
   traineeWorkoutDelete,
+} = require('../../controllers/trainer/traineeWorkout')
+const {
+  trainerTraineeData,
+  trainerTraineeUpdate,
+} = require('../../controllers/trainer/trainerTrainee')
+const {
   trainerNoteData,
   trainerNoteCreate,
   trainerNoteUpdate,
-  trainerNoteDelete,
-} = require('../../controllers/trainer')
+  trainerNoteDelete
+} = require('../../controllers/trainer/trainerNotes')
+const {
+  traineeCreate,
+  traineeDelete,
+  traineeRestore,
+} = require('../../controllers/trainee')
 
 // for testing only
 router.get('/listen', (req, res, next) => {
   res.json({ title: 'I am Trainer', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-router.post('/register', trainerCreate)
 router.post('/login', trainerLogin)
 router.post('/logout', trainerLogout)
 
@@ -43,10 +51,11 @@ router.post('/delete/:id', trainerDelete)
 router.post('/restore/:id', trainerRestore)
 
 // ==========>>>> trainee
-router.get('/trainee/:id', trainerTraineeData)
-router.post('/trainee/create/:traineeId', trainerTraineeCreate)
+router.post('/trainee', trainerTraineeData)
+router.post('/trainee/create', traineeCreate)
 router.post('/trainee/update/:id', trainerTraineeUpdate)
-router.post('/trainee/delete/:id', trainerTraineeDelete)
+router.post('/trainee/delete/:id', traineeDelete)
+router.post('/trainee/restore/:id', traineeRestore)
 
 // ==========>>>> Workouts
 router.get('/workouts/:id', traineeWorkoutData)

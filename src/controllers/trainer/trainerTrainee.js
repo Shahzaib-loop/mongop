@@ -1,34 +1,31 @@
+const bcrypt = require('bcryptjs')
 const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
+const { uniqueCheck } = require('../../utils/uniqueCheck');
 const { addActivity } = require("../../utils/activities")
-const TrainerActivities = db.sequelize.model('trainer_activities')
+const Trainee = db.sequelize.model('trainees')
+// const TrainerActivities = db.sequelize.model('trainer_activities')
+// const TraineeActivities = db.sequelize.model('trainee_activities')
 const {
-  getTrainerNote,
-  createTrainerNote,
-  updateTrainerNote,
-  deleteTrainerNote,
-} = require("../../services/trainer")
+  getTrainer,
+} = require('../../services/trainer/trainer')
+const {
+  getTrainerTrainee,
+  updateTrainerTrainee,
+} = require('../../services/trainer/trainerTrainee')
 
 const trainerTraineeData = async (req, res) => {
   try {
-    // iski zarorat shayad na paray kunke jab workout get hoon gat to join se ye notes sath ain gay hr workout ke
+    const { trainerId = '', } = req?.body
 
-    const { id } = req.params //  workoutId
+    if (!(trainerId)) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
 
-    // workoutId ke against saved note le ay ga
-  }
-  catch (error) {
-    responseHandler.error(res, 500, error.message, "")
-  }
-}
+    let traineesData = await getTrainerTrainee(trainerId)
 
-const trainerTraineeCreate = async (req, res) => {
-  try {
-    const { id } = req.params //  workoutId
-    const { trainerId, description } = req.body // trainerId
-
-    // workout ke against note save hoga or traineeId params se mil rhi hogi as traineeNotes
+    responseHandler.success(res, "Trainees Fetched Successfully", traineesData)
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
@@ -37,21 +34,65 @@ const trainerTraineeCreate = async (req, res) => {
 
 const trainerTraineeUpdate = async (req, res) => {
   try {
-    const { id } = req.params //  noteId
-    const { trainerId, ...rest } = req.body // trainerId remove krni ha, cant be updated
+    const { id = '' } = req?.params
+    const { trainerId, email, number, ...rest } = req?.body
 
-    // noteId ke against note save hoga
+    if (!(id && trainerId && rest?.firstName?.length > 0 && rest?.lastName?.length > 0)) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    let isExisting = await uniqueCheck(Trainee, req.body, "trainee",)
+
+    if (isExisting?.reason) {
+      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
+    }
+
+    await updateTrainerTrainee(id, rest)
+
+    // await addActivity(
+    //   trainerActivities,
+    //   'trainerId',
+    //   trainerId,
+    //   'TRAINER_UPDATED_TRAINEE',
+    //   'trainer updated trainee'
+    // )
+    // await addActivity(
+    //   traineeActivities,
+    //   'traineeId',
+    //   id,
+    //   'TRAINEE_UPDATED_BY_TRAINER',
+    //   'trainee updated by trainer'
+    // )
+
+    responseHandler.success(res, "Trainee Updated Successfully")
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
 }
 
-const trainerTraineeDelete = async (req, res) => {
+const trainerTraineeUpdatePassword = async (req, res) => {
   try {
-    const { id } = req.params //  noteId
+    const { id = '' } = req?.params
+    const { trainerId = '', password = '' } = req?.body
 
-    // noteId ke against note delete hoga
+    if (!(trainerId && password)) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+  }
+  catch (error) {
+    responseHandler.error(res, 500, error.message, "")
+  }
+}
+
+const trainerTraineeUpdateEmail = async (req, res) => {
+  try {
+    const { id } = req?.params
+    const { trainerId = '', password = '' } = req?.body
+
+    if (!(trainerId && password)) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
@@ -60,7 +101,7 @@ const trainerTraineeDelete = async (req, res) => {
 
 module.exports = {
   trainerTraineeData,
-  trainerTraineeCreate,
   trainerTraineeUpdate,
-  trainerTraineeDelete,
+  trainerTraineeUpdatePassword,
+  trainerTraineeUpdateEmail,
 }

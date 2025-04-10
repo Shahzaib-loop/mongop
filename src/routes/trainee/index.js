@@ -10,7 +10,7 @@ const {
   traineeUpdate,
   traineeDelete,
   traineeRestore,
-} = require('../../controllers/trainee')
+} = require('../../controllers/trainee/trainee')
 
 // for testing only
 router.get('/listen', (req, res, next) => {

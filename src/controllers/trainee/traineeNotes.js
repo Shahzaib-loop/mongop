@@ -6,13 +6,13 @@ const {
   createTraineeNote,
   updateTraineeNote,
   deleteTraineeNote,
-} = require("../../services/trainee/trainee")
+} = require("../../services/trainee/traineeNotes")
 
 const traineeNoteData = async (req, res) => {
   try {
     // iski zarorat shayad na paray kunke jab workout get hoon gat to join se ye notes sath ain gay hr workout ke
 
-    const { id } = req.params //  workoutId
+    const { id } = req?.params //  workoutId
 
     // workoutId ke against saved note le ay ga
   }
@@ -23,8 +23,8 @@ const traineeNoteData = async (req, res) => {
 
 const traineeNoteCreate = async (req, res) => {
   try {
-    const { id } = req.params //  workoutId
-    const { traineeId, description } = req.body // traineeId
+    const { id } = req?.params //  workoutId
+    const { traineeId, description } = req?.body // traineeId
 
     // workout ke against note save hoga or traineeId params se mil rhi hogi as traineeNotes
   }
@@ -35,8 +35,8 @@ const traineeNoteCreate = async (req, res) => {
 
 const traineeNoteUpdate = async (req, res) => {
   try {
-    const { id } = req.params //  noteId
-    const { traineeId, ...rest } = req.body // traineeId remove krni ha, cant be updated
+    const { id } = req?.params //  noteId
+    const { traineeId, ...rest } = req?.body // traineeId remove krni ha, cant be updated
 
     // noteId ke against note save hoga
   }
@@ -47,7 +47,7 @@ const traineeNoteUpdate = async (req, res) => {
 
 const traineeNoteDelete = async (req, res) => {
   try {
-    const { id } = req.params //  noteId
+    const { id } = req?.params //  noteId
 
     // noteId ke against note delete hoga
   }

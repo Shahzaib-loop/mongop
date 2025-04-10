@@ -4,22 +4,24 @@ const responseHandler = require('../../utils/responseHandler')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const Trainee = db.sequelize.model('trainees')
-const TraineeActivities = db.sequelize.model('trainee_activities')
+// const TraineeActivities = db.sequelize.model('trainee_activities')
 const {
-  createTrainee,
   loginTrainee,
   logoutTrainee,
+  getTraineeActivities,
   getTrainees,
   getTrainee,
-  getTraineeActivities,
+  createTrainee,
   updateTrainee,
   deleteTrainee,
   restoreTrainee,
 } = require("../../services/trainee/trainee")
+const bcrypt = require('bcryptjs');
+const { getTrainer } = require('../../services/trainer/trainer');
 
 const traineeLogin = async (req, res) => {
   try {
-    const { email = '', password = '' } = req.body
+    const { email = '', password = '' } = req?.body
 
     if (!(email && password)) {
       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
@@ -51,7 +53,7 @@ const traineeLogout = async (req, res) => {
 
 const traineeActivities = async (req, res) => {
   try {
-    const { id = '' } = req.params
+    const { id = '' } = req?.params
 
     const data = await getTraineeActivities(id)
 
@@ -75,7 +77,7 @@ const traineesData = async (req, res) => {
 
 const traineeData = async (req, res) => {
   try {
-    const { id = '' } = req.params
+    const { id = '' } = req?.params
 
     const data = await getTrainee(id)
 
@@ -86,34 +88,64 @@ const traineeData = async (req, res) => {
   }
 }
 
-const traineeCreate = async (req, res) => {
+const traineeCreate = async (req, res) =>  {
   try {
     const {
+      trainerId = '',
       firstName = '',
       lastName = '',
       email = '',
       number = '',
-      password = '',
     } = req?.body
 
-    if (!(firstName && lastName && email && number && password)) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "required fields are empty or invalid")
+    if (!(trainerId && firstName && lastName && email && number)) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    let isExisting = await uniqueCheck(Trainee, req.body, "Trainee",)
+    let isExisting = await uniqueCheck(Trainee, req.body, "trainee",)
 
     if (isExisting?.reason) {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const trainee = await createTrainee(req.body)
+    const tempPassword = 'tester'
+    const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-    await addActivity(TraineeActivities, 'traineeId', trainee?.id, "TRAINEE_CREATED", "trainee registered")
+    const trainerData = await getTrainer(trainerId)
 
-    responseHandler.created(res, "Trainee registered successfully", trainee)
+    if (!(trainerData?.id && trainerData?.gymId)) {
+      return responseHandler.error(res, 500, 'Server Error', 'internal server error')
+    }
+
+    let trainee = await createTrainee({
+      ...req.body,
+      trainerId,
+      gymId: trainerData.gymId,
+      password: hashedPassword
+    })
+
+    if (!(Object.keys(trainee).length > 0)) {
+      responseHandler.error(res, 400, "", "",)
+    }
+
+    // await addActivity(
+    //   TrainerActivities,
+    //   'trainerId',
+    //   trainerId,
+    //   "TRAINER_CREATED_TRAINEE",
+    //   "trainer created trainee"
+    // )
+    // await addActivity(
+    //   TraineeActivities,
+    //   'traineeId',
+    //   trainee.id,
+    //   "TRAINEE_CREATED_BY_TRAINER",
+    //   "trainee created by trainer"
+    // )
+
+    responseHandler.success(res, "Trainee Created Successfully", trainee)
   }
   catch (error) {
-    logger.error(`${ error }`)
     responseHandler.error(res, 500, "", error.message,)
   }
 }
@@ -125,7 +157,7 @@ const traineeUpdate = async (req, res) => {
 
     await updateTrainee(id, rest)
 
-    await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_UPDATED", "trainee updated")
+    // await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_UPDATED", "trainee updated")
 
     responseHandler.success(res, "Trainee Updated successfully")
   }
@@ -144,7 +176,7 @@ const traineeDelete = async (req, res) => {
 
     await deleteTrainee(id)
 
-    await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_DELETED", "trainee deleted")
+    // await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_DELETED", "trainee deleted")
 
     responseHandler.success(res, "Trainee Deleted successfully")
   }
@@ -163,7 +195,7 @@ const traineeRestore = async (req, res) => {
 
     await restoreTrainee(id)
 
-    await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_RESTORED", "trainee restored")
+    // await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_RESTORED", "trainee restored")
 
     responseHandler.success(res, "Trainee Restored successfully")
   }

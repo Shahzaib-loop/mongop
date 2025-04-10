@@ -11,7 +11,7 @@ router.get('/', (req, res, next) => {
 
 // activitiesssssss
 
-router.use('/admin', adminRouter)
+// router.use('/admin', adminRouter)
 router.use('/gym', gymRouter)
 router.use('/trainer', trainerRouter)
 router.use('/trainee', traineeRouter)

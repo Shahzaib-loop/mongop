@@ -2,8 +2,8 @@ const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
 const Gym = db.sequelize.model('gyms')
-const GymActivities = db.sequelize.model('gym_activities')
-const TrainerActivities = db.sequelize.model('trainer_activities')
+// const GymActivities = db.sequelize.model('gym_activities')
+// const TrainerActivities = db.sequelize.model('trainer_activities')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const { createTrainer } = require('../../services/trainer/trainer')
@@ -17,52 +17,15 @@ const {
   updateGym,
   deleteGym,
   restoreGym,
-} = require("../../services/gym")
+} = require("../../services/gym/gym")
 
 //  when register api hit, it will just add data & send code to email or number
 //  after verification the account will register & user will login with access & refresh tokens
 //  there will be timer to verify, when timer ends the user will be soft deleted
 
-const gymsData = async (req, res) => {
-  try {
-    const data = await getGyms()
-
-    responseHandler.success(res, "Gyms Fetched successfully", data)
-  }
-  catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
-  }
-}
-
-const gymData = async (req, res) => {
-  try {
-    const { id = '' } = req.params
-
-    const data = await getGym(id)
-
-    responseHandler.success(res, "Gym Data Fetched successfully", data)
-  }
-  catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
-  }
-}
-
-const gymActivities = async (req, res) => {
-  try {
-    const { id = '' } = req.params
-
-    const data = await getGymActivities(id)
-
-    responseHandler.success(res, "Gym Activities Fetched successfully", data)
-  }
-  catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
-  }
-}
-
 const gymLogin = async (req, res) => {
   try {
-    const { email = '', password = '' } = req.body
+    const { email = '', password = '' } = req?.body
 
     if (!(email && password)) {
       logger.info(`Gym Login Failed as 
@@ -101,7 +64,7 @@ const gymLogin = async (req, res) => {
 
 const gymLogout = async (req, res) => {
   try {
-    const { refreshToken = '' } = req.body
+    const { refreshToken = '' } = req?.body
 
     if (!refreshToken) {
       return responseHandler.error(
@@ -122,6 +85,43 @@ const gymLogout = async (req, res) => {
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message)
+  }
+}
+
+const gymActivities = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+
+    const data = await getGymActivities(id)
+
+    responseHandler.success(res, "Gym Activities Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+const gymsData = async (req, res) => {
+  try {
+    const data = await getGyms()
+
+    responseHandler.success(res, "Gyms Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+const gymData = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+
+    const data = await getGym(id)
+
+    responseHandler.success(res, "Gym Data Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -171,8 +171,9 @@ const gymCreate = async (req, res) => {
     gym = await createGym(req.body, t)
     trainer = await createTrainer({ ...trainerData, gymId: gym.id, trainerType: 'default' }, t)
 
-    await addActivity(GymActivities, 'gymId', gym?.id, "GYM_CREATED", "gym registered", t)
-    await addActivity(TrainerActivities, 'trainerId', trainer?.id, "DEFAULT_TRAINER_CREATED", "default trainer created", t)
+    // await addActivity(GymActivities, 'gymId', gym?.id, "GYM_CREATED", "gym registered", t)
+    // await addActivity(TrainerActivities, 'trainerId', trainer?.id, "DEFAULT_TRAINER_CREATED", "default trainer
+    // created", t)
 
     await t.commit()
 
@@ -202,7 +203,7 @@ const gymUpdate = async (req, res) => {
 
     await updateGym(id, rest)
 
-    await addActivity(GymActivities, 'gymId', id, "GYM_UPDATED", "gym updated")
+    // await addActivity(GymActivities, 'gymId', id, "GYM_UPDATED", "gym updated")
 
     responseHandler.success(res, "Gym Updated successfully")
   }
@@ -226,7 +227,7 @@ const gymDelete = async (req, res) => {
 
     await deleteGym(id)
 
-    await addActivity(GymActivities, 'gymId', id, "GYM_DELETED", "gym deleted")
+    // await addActivity(GymActivities, 'gymId', id, "GYM_DELETED", "gym deleted")
 
     responseHandler.success(res, "Gym Deleted successfully")
   }
@@ -250,7 +251,7 @@ const gymRestore = async (req, res) => {
 
     await restoreGym(id)
 
-    await addActivity(GymActivities, 'gymId', id, "GYM_RESTORED", "gym restored")
+    // await addActivity(GymActivities, 'gymId', id, "GYM_RESTORED", "gym restored")
 
     responseHandler.success(res, "Gym Restored successfully")
   }

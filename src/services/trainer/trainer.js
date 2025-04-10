@@ -2,7 +2,8 @@ const db = require("../../models")
 const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../../utils/auth')
 const Trainer = db.sequelize.model('trainers')
-const TrainerActivities = db.sequelize.model('trainer_activities')
+const Trainee = db.sequelize.model('trainees')
+// const TrainerActivities = db.sequelize.model('trainer_activities')
 
 const loginTrainer = async ({ email, password }) => {
   const trainer = await Trainer.findOne({ where: { email }, raw: true })
@@ -25,30 +26,30 @@ const logoutTrainer = async (email) => {
 }
 
 const getTrainerActivities = async (id) => {
-  return TrainerActivities.findAll({ where: { trainerId: id }, })
+  // return TrainerActivities.findAll({ where: { trainerId: id }, })
 }
 
 const getTrainers = async () => {
-  return Trainer.findAll()
+  return Trainer.findAll({ where: { deleted: false } })
 }
 
 const getTrainer = async (id) => {
   return Trainer.findOne({
-    where: { id },
-    include: {
-      model: TrainerActivities,
-    }
+    where: { id, deleted: false, },
+    include: [
+      // {
+      //   model: TrainerActivities,
+      // },
+      {
+        model: Trainee,
+        as: 'trainees',
+      },
+    ]
   })
 }
 
 const createTrainer = async (data, t) => {
-  const tempPassword = 'tester'
-
-  const hashedPassword = await bcrypt.hash(data?.password ? data.password : tempPassword, 10)
-
-  let trainer = await Trainer.create({ ...data, password: hashedPassword }, { transaction: t })
-
-  return trainer
+  return Trainer.create(data, { transaction: t })
 }
 
 const updateTrainer = async (id, data) => {

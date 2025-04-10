@@ -1,8 +1,9 @@
 const db = require("../../models")
 const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../../utils/auth')
+const { where } = require('sequelize');
 const Trainee = db.sequelize.model('trainees')
-const TraineeActivities = db.sequelize.model('trainee_activities')
+// const TraineeActivities = db.sequelize.model('trainee_activities')
 
 const loginTrainee = async ({ email, password }) => {
   const trainee = await Trainee.findOne({ where: { email }, raw: true })
@@ -25,30 +26,24 @@ const logoutTrainee = async (email) => {
 }
 
 const getTraineeActivities = async (id) => {
-  return TraineeActivities.findAll({ where: { traineeId: id }, })
+  // return TraineeActivities.findAll({ where: { traineeId: id }, })
 }
 
-const getTrainees = async () => {
-  return Trainee.findAll()
+const getTrainees = async (trainerId) => {
+  return Trainee.findAll({ where: { trainerId } })
 }
 
 const getTrainee = async (id) => {
   return Trainee.findOne({
     where: { id },
-    include: {
-      model: TraineeActivities,
-    }
+    // include: {
+    //   model: TraineeActivities,
+    // }
   })
 }
 
-const createTrainee = async (data) => {
-  const tempPassword = 'tester'
-
-  const hashedPassword = await bcrypt.hash(data?.password ? data.password : tempPassword, 10)
-
-  let trainer = await Trainee.create({ ...data, password: hashedPassword })
-
-  return trainer
+const createTrainee = async (data, t) => {
+  return Trainee.create(data, { transaction: t })
 }
 
 const updateTrainee = async (id, data) => {

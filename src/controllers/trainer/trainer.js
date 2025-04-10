@@ -4,7 +4,7 @@ const responseHandler = require('../../utils/responseHandler')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const Trainer = db.sequelize.model('trainers')
-const TrainerActivities = db.sequelize.model('trainer_activities')
+// const TrainerActivities = db.sequelize.model('trainer_activities')
 const {
   createTrainer,
   loginTrainer,
@@ -15,11 +15,11 @@ const {
   updateTrainer,
   deleteTrainer,
   restoreTrainer,
-} = require("../../services/trainer")
+} = require("../../services/trainer/trainer")
 
 const trainerLogin = async (req, res) => {
   try {
-    const { email = '', password = '' } = req.body
+    const { email = '', password = '' } = req?.body
 
     if (!(email && password)) {
       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
@@ -51,7 +51,7 @@ const trainerLogout = async (req, res) => {
 
 const trainerActivities = async (req, res) => {
   try {
-    const { id = '' } = req.params
+    const { id = '' } = req?.params
 
     if (!id) {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
@@ -79,7 +79,7 @@ const trainersData = async (req, res) => {
 
 const trainerData = async (req, res) => {
   try {
-    const { id = '' } = req.params
+    const { id = '' } = req?.params
 
     if (!id) {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
@@ -96,7 +96,7 @@ const trainerData = async (req, res) => {
 
 const trainerCreate = async (req, res) => {
   try {
-    const tempPassword = 'tester123'
+    const tempPassword = 'tester'
     const {
       firstName = '',
       lastName = '',
@@ -118,7 +118,7 @@ const trainerCreate = async (req, res) => {
     let trainer = await createTrainer({ ...req.body, password: password ? password : tempPassword })
     trainer = await trainer.toJSON()
 
-    await addActivity(TrainerActivities, trainer?.id, "TRAINER_CREATED", "trainer registered")
+    // await addActivity(TrainerActivities, trainer?.id, "TRAINER_CREATED", "trainer registered")
 
     responseHandler.created(res, "Trainer registered successfully", trainer)
   }
@@ -139,7 +139,7 @@ const trainerUpdate = async (req, res) => {
 
     await updateTrainer(id, rest)
 
-    await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
+    // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
 
     responseHandler.success(res, "Trainer Updated successfully")
   }
@@ -158,7 +158,7 @@ const trainerDelete = async (req, res) => {
 
     await deleteTrainer(id)
 
-    await addActivity(TrainerActivities, id, "TRAINER_DELETED", "trainer deleted")
+    // await addActivity(TrainerActivities, id, "TRAINER_DELETED", "trainer deleted")
 
     responseHandler.success(res, "Trainer Deleted successfully")
   }
@@ -177,7 +177,7 @@ const trainerRestore = async (req, res) => {
 
     await restoreTrainer(id)
 
-    await addActivity(TrainerActivities, id, "TRAINER_RESTORED", "trainer restored")
+    // await addActivity(TrainerActivities, id, "TRAINER_RESTORED", "trainer restored")
 
     responseHandler.success(res, "Trainer Restored successfully")
   }

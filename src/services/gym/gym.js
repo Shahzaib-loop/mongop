@@ -4,7 +4,7 @@ const { generateTokens } = require('../../utils/auth')
 const Gym = db.sequelize.model('gyms')
 const Trainee = db.sequelize.model('trainees')
 const Trainer = db.sequelize.model('trainers')
-const GymActivities = db.sequelize.model('gym_activities')
+// const GymActivities = db.sequelize.model('gym_activities')
 
 const createGym = async (data, t) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
@@ -47,7 +47,7 @@ const getGyms = async () => {
   return Gym.findAll({
     include: [
       {
-        model: GymActivities,
+        // model: GymActivities,
         as: 'gymActivities'
       },
       {
@@ -66,24 +66,27 @@ const getGym = async (id) => {
   return Gym.findOne({
     where: { id },
     include: [
-      {
-        model: GymActivities,
-        as: 'gymActivities'
-      },
-      {
-        model: Trainee,
-        as: 'gymTrainee'
-      },
+      // {
+      //   model: GymActivities,
+      //   as: 'gymActivities'
+      // },
       {
         model: Trainer,
-        as: 'gymTrainer'
+        as: 'trainers',
+        include: [
+          {
+            model: Trainee,
+            as: 'trainees'
+          },
+        ]
       },
+
     ]
   })
 }
 
 const getGymActivities = async (id) => {
-  return GymActivities.findAll({ where: { gymId: id }, })
+  // return GymActivities.findAll({ where: { gymId: id }, })
 }
 
 const updateGym = async (id, data) => {
@@ -98,6 +101,24 @@ const restoreGym = async (id) => {
   return Gym.update({ deleted: false }, { where: { id } })
 }
 
+const getGymTrainer = async (gymId) => {
+  return Trainer.findOne({
+    where: { gymId },
+    // include: {
+    //   model: TrainerActivities,
+    // }
+  })
+}
+
+const getAllGymTrainers = async (gymId) => {
+  return Trainer.findAll({
+    where: { gymId },
+    // include: {
+    //   model: TrainerActivities,
+    // }
+  })
+}
+
 module.exports = {
   createGym,
   loginGym,
@@ -108,4 +129,6 @@ module.exports = {
   updateGym,
   deleteGym,
   restoreGym,
+  getGymTrainer,
+  getAllGymTrainers,
 }

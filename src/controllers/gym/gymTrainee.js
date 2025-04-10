@@ -1,12 +1,14 @@
 const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
-const Trainee = db.sequelize.model('trainees')
-const GymActivities = db.sequelize.model('gym_activities')
-const TraineeActivities = db.sequelize.model('trainee_activities')
 const { uniqueCheck } = require('../../utils/uniqueCheck')
 const { addActivity } = require('../../utils/activities')
-const { createTrainee } = require('../../services/trainee')
+const Trainee = db.sequelize.model('trainees')
+// const GymActivities = db.sequelize.model('gym_activities')
+// const TraineeActivities = db.sequelize.model('trainee_activities')
+const { createTrainee, } = require('../../services/trainee/trainee')
+const { getGymTrainer, } = require('../../services/gym/gym')
+const bcrypt = require('bcryptjs');
 
 const addGymTrainee = async (req, res) => {
   try {
@@ -20,6 +22,8 @@ const addGymTrainee = async (req, res) => {
     const { id = '', } = req?.params
     const { firstName = '', lastName = '', email = '', number = '', } = req?.body
 
+    console.log(req.body)
+
     if (!(id && firstName && lastName && email && number)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
@@ -30,26 +34,33 @@ const addGymTrainee = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let trainee = await createTrainee({ ...req.body, gymId: id, })
+    const trainerData = await getGymTrainer(id)
+
+    console.log(trainerData, "rrrrrrrrrr trainerDatatrainerDatatrainerData")
+
+    const tempPassword = 'tester'
+    const hashedPassword = await bcrypt.hash(tempPassword, 10)
+
+    let trainee = await createTrainee({ ...req.body, gymId: id, trainerId: trainerData.id, password: hashedPassword })
 
     if (!(Object.keys(trainee).length > 0)) {
       responseHandler.error(res, 400, "", "",)
     }
 
-    await addActivity(
-      GymActivities,
-      'gymId',
-      id,
-      "GYM_ADDED_TRAINEE",
-      "gym added trainee"
-    )
-    await addActivity(
-      TraineeActivities,
-      'traineeId',
-      trainee.id,
-      "TRAINEE_CREATED_BY_GYM",
-      "trainee created by gym"
-    )
+    // await addActivity(
+    //   GymActivities,
+    //   'gymId',
+    //   id,
+    //   "GYM_ADDED_TRAINEE",
+    //   "gym added trainee"
+    // )
+    // await addActivity(
+    //   TraineeActivities,
+    //   'traineeId',
+    //   trainee.id,
+    //   "TRAINEE_CREATED_BY_GYM",
+    //   "trainee created by gym"
+    // )
 
     responseHandler.success(res, "Trainee Created Successfully", trainee)
   }
