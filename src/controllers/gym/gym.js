@@ -7,17 +7,7 @@ const Gym = db.sequelize.model('gyms')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const { createTrainer } = require('../../services/trainer/trainer')
-const {
-  createGym,
-  loginGym,
-  logoutGym,
-  getGyms,
-  getGym,
-  getGymActivities,
-  updateGym,
-  deleteGym,
-  restoreGym,
-} = require("../../services/gym/gym")
+const gym = require("../../services/gym/gym")
 
 //  when register api hit, it will just add data & send code to email or number
 //  after verification the account will register & user will login with access & refresh tokens
@@ -40,7 +30,7 @@ const gymLogin = async (req, res) => {
       )
     }
 
-    const resp = await loginGym({ email, password })
+    const resp = await gym.loginGym({ email, password })
 
     if (!(Object.keys(resp).length > 0)) {
       logger.info(`Gym Login Failed as 
@@ -75,7 +65,7 @@ const gymLogout = async (req, res) => {
       )
     }
 
-    const result = await logoutGym(refreshToken)
+    const result = await gym.logoutGym(refreshToken)
 
     if (!result) {
       return responseHandler.error(res, 500, "Logout failed", "failed to process logout")
@@ -92,7 +82,7 @@ const gymActivities = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
-    const data = await getGymActivities(id)
+    const data = await gym.getGymActivities(id)
 
     responseHandler.success(res, "Gym Activities Fetched successfully", data)
   }
@@ -103,7 +93,7 @@ const gymActivities = async (req, res) => {
 
 const gymsData = async (req, res) => {
   try {
-    const data = await getGyms()
+    const data = await gym.getGyms()
 
     responseHandler.success(res, "Gyms Fetched successfully", data)
   }
@@ -116,7 +106,7 @@ const gymData = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
-    const data = await getGym(id)
+    const data = await gym.getGym(id)
 
     responseHandler.success(res, "Gym Data Fetched successfully", data)
   }
@@ -168,7 +158,7 @@ const gymCreate = async (req, res) => {
       password,
     }
 
-    gym = await createGym(req.body, t)
+    gym = await gym.createGym(req.body, t)
     trainer = await createTrainer({ ...trainerData, gymId: gym.id, trainerType: 'default' }, t)
 
     // await addActivity(GymActivities, 'gymId', gym?.id, "GYM_CREATED", "gym registered", t)
@@ -201,7 +191,7 @@ const gymUpdate = async (req, res) => {
       )
     }
 
-    await updateGym(id, rest)
+    await gym.updateGym(id, rest)
 
     // await addActivity(GymActivities, 'gymId', id, "GYM_UPDATED", "gym updated")
 
@@ -225,7 +215,7 @@ const gymDelete = async (req, res) => {
       )
     }
 
-    await deleteGym(id)
+    await gym.deleteGym(id)
 
     // await addActivity(GymActivities, 'gymId', id, "GYM_DELETED", "gym deleted")
 
@@ -249,7 +239,7 @@ const gymRestore = async (req, res) => {
       )
     }
 
-    await restoreGym(id)
+    await gym.restoreGym(id)
 
     // await addActivity(GymActivities, 'gymId', id, "GYM_RESTORED", "gym restored")
 
@@ -261,12 +251,12 @@ const gymRestore = async (req, res) => {
 }
 
 module.exports = {
-  gymCreate,
   gymLogin,
   gymLogout,
+  gymActivities,
   gymsData,
   gymData,
-  gymActivities,
+  gymCreate,
   gymUpdate,
   gymDelete,
   gymRestore,

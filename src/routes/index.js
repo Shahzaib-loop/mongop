@@ -9,8 +9,6 @@ router.get('/', (req, res, next) => {
   res.json({ title: 'Router', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-// activitiesssssss
-
 // router.use('/admin', adminRouter)
 router.use('/gym', gymRouter)
 router.use('/trainer', trainerRouter)

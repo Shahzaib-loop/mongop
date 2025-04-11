@@ -75,6 +75,10 @@ const gyms = sequelize.define("gyms", {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
-})
+},
+  {
+    timestamps: true
+  }
+)
 
 module.exports = gyms

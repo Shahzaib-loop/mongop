@@ -1,12 +1,7 @@
 const db = require('../../models')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
-const {
-  getTraineeNote,
-  createTraineeNote,
-  updateTraineeNote,
-  deleteTraineeNote,
-} = require("../../services/trainee/traineeNotes")
+const traineeNotes = require("../../services/trainee/traineeNotes")
 
 const traineeNoteData = async (req, res) => {
   try {

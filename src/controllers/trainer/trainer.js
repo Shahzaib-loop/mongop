@@ -5,17 +5,7 @@ const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const Trainer = db.sequelize.model('trainers')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
-const {
-  createTrainer,
-  loginTrainer,
-  logoutTrainer,
-  getTrainers,
-  getTrainer,
-  getTrainerActivities,
-  updateTrainer,
-  deleteTrainer,
-  restoreTrainer,
-} = require("../../services/trainer/trainer")
+const trainer = require("../../services/trainer/trainer")
 
 const trainerLogin = async (req, res) => {
   try {
@@ -25,7 +15,7 @@ const trainerLogin = async (req, res) => {
       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
     }
 
-    const resp = await loginTrainer({ email, password })
+    const resp = await trainer.loginTrainer({ email, password })
 
     if (!(Object.keys(resp).length > 0)) {
       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
@@ -40,7 +30,7 @@ const trainerLogin = async (req, res) => {
 
 const trainerLogout = async (req, res) => {
   try {
-    const tokens = await logoutTrainer(req.body)
+    const tokens = await trainer.logoutTrainer(req.body)
 
     responseHandler.success(res, "Trainer Logout successfully", tokens)
   }
@@ -57,7 +47,7 @@ const trainerActivities = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    const data = await getTrainerActivities(id)
+    const data = await trainer.getTrainerActivities(id)
 
     responseHandler.success(res, "Trainer Data Fetched successfully", data)
   }
@@ -68,7 +58,7 @@ const trainerActivities = async (req, res) => {
 
 const trainersData = async (req, res) => {
   try {
-    const data = await getTrainers()
+    const data = await trainer.getTrainers()
 
     responseHandler.success(res, "Trainees Fetched successfully", data)
   }
@@ -85,7 +75,7 @@ const trainerData = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    const data = await getTrainer(id)
+    const data = await trainer.getTrainer(id)
 
     responseHandler.success(res, "Trainer Data Fetched successfully", data)
   }
@@ -98,6 +88,7 @@ const trainerCreate = async (req, res) => {
   try {
     const tempPassword = 'tester'
     const {
+      gymId = '',
       firstName = '',
       lastName = '',
       email = '',
@@ -115,12 +106,12 @@ const trainerCreate = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let trainer = await createTrainer({ ...req.body, password: password ? password : tempPassword })
-    trainer = await trainer.toJSON()
+    let trainerData = await trainer.createTrainer({ ...req.body, password: password ? password : tempPassword })
+    trainerData = await trainerData.toJSON()
 
     // await addActivity(TrainerActivities, trainer?.id, "TRAINER_CREATED", "trainer registered")
 
-    responseHandler.created(res, "Trainer registered successfully", trainer)
+    responseHandler.created(res, "Trainer registered successfully", trainerData)
   }
   catch (error) {
     logger.error(`${ error }`)
@@ -137,7 +128,7 @@ const trainerUpdate = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    await updateTrainer(id, rest)
+    await trainer.updateTrainer(id, rest)
 
     // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
 
@@ -156,7 +147,7 @@ const trainerDelete = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    await deleteTrainer(id)
+    await trainer.deleteTrainer(id)
 
     // await addActivity(TrainerActivities, id, "TRAINER_DELETED", "trainer deleted")
 
@@ -175,7 +166,7 @@ const trainerRestore = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    await restoreTrainer(id)
+    await trainer.restoreTrainer(id)
 
     // await addActivity(TrainerActivities, id, "TRAINER_RESTORED", "trainer restored")
 

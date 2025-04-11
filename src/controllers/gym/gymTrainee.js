@@ -6,8 +6,8 @@ const { addActivity } = require('../../utils/activities')
 const Trainee = db.sequelize.model('trainees')
 // const GymActivities = db.sequelize.model('gym_activities')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
-const { createTrainee, } = require('../../services/trainee/trainee')
-const { getGymTrainer, } = require('../../services/gym/gym')
+const trainee = require('../../services/trainee/trainee')
+const gym = require('../../services/gym/gym')
 const bcrypt = require('bcryptjs');
 
 const addGymTrainee = async (req, res) => {
@@ -34,14 +34,14 @@ const addGymTrainee = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const trainerData = await getGymTrainer(id)
+    const trainerData = await gym.getGymTrainer(id)
 
     console.log(trainerData, "rrrrrrrrrr trainerDatatrainerDatatrainerData")
 
     const tempPassword = 'tester'
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-    let trainee = await createTrainee({ ...req.body, gymId: id, trainerId: trainerData.id, password: hashedPassword })
+    let trainee = await trainee.createTrainee({ ...req.body, gymId: id, trainerId: trainerData.id, password: hashedPassword })
 
     if (!(Object.keys(trainee).length > 0)) {
       responseHandler.error(res, 400, "", "",)

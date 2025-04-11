@@ -7,13 +7,8 @@ const { addActivity } = require("../../utils/activities")
 const Trainee = db.sequelize.model('trainees')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
-const {
-  getTrainer,
-} = require('../../services/trainer/trainer')
-const {
-  getTrainerTrainee,
-  updateTrainerTrainee,
-} = require('../../services/trainer/trainerTrainee')
+const trainer = require('../../services/trainer/trainer')
+const trainerTrainee = require('../../services/trainer/trainerTrainee')
 
 const trainerTraineeData = async (req, res) => {
   try {
@@ -23,7 +18,7 @@ const trainerTraineeData = async (req, res) => {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    let traineesData = await getTrainerTrainee(trainerId)
+    let traineesData = await trainerTrainee.getTrainerTrainee(trainerId)
 
     responseHandler.success(res, "Trainees Fetched Successfully", traineesData)
   }
@@ -47,7 +42,7 @@ const trainerTraineeUpdate = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    await updateTrainerTrainee(id, rest)
+    await trainerTrainee.updateTrainerTrainee(id, rest)
 
     // await addActivity(
     //   trainerActivities,

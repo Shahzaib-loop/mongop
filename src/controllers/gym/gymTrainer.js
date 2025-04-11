@@ -7,7 +7,7 @@ const Trainer = db.sequelize.model('trainers')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 const { uniqueCheck } = require('../../utils/uniqueCheck')
 const { addActivity } = require('../../utils/activities')
-const { createTrainer } = require('../../services/trainer/trainer')
+const trainer  = require('../../services/trainer/trainer')
 
 const addGymTrainer = async (req, res) => {
   try {
@@ -27,7 +27,7 @@ const addGymTrainer = async (req, res) => {
     const tempPassword = 'tester'
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-    let trainer = await createTrainer({ ...req.body, gymId: id, trainerType: 'non_default', password: hashedPassword })
+    let trainerData = await trainer.createTrainer({ ...req.body, gymId: id, trainerType: 'non_default', password: hashedPassword })
 
     if (!(Object.keys(trainer).length > 0)) {
       responseHandler.error(res, 400, "", "",)
@@ -48,7 +48,7 @@ const addGymTrainer = async (req, res) => {
     //   "trainer created by gym"
     // )
 
-    responseHandler.success(res, "Trainer Created Successfully", trainer)
+    responseHandler.success(res, "Trainer Created Successfully", trainerData)
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)

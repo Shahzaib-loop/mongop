@@ -28,6 +28,10 @@
 //     type: DataTypes.DATE,
 //     defaultValue: DataTypes.NOW,
 //   },
-// })
+// },
+//   {
+//     timestamps: true
+//   }
+// )
 //
 // module.exports = trainer_activities

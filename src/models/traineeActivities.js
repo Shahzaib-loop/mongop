@@ -28,6 +28,10 @@
 //     type: DataTypes.DATE,
 //     defaultValue: DataTypes.NOW,
 //   },
-// })
+// },
+//   {
+//     timestamps: true
+//   }
+// )
 //
 // module.exports = trainee_activities

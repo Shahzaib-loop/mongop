@@ -5,17 +5,7 @@
 // const { addActivity } = require('../../utils/activities')
 // const Admin = db.sequelize.model('admins')
 // const AdminActivities = db.sequelize.model('admin_activities')
-// const {
-//   createAdmin,
-//   loginAdmin,
-//   logoutAdmin,
-//   getAdmins,
-//   getAdmin,
-//   getAdminActivities,
-//   updateAdmin,
-//   deleteAdmin,
-//   restoreAdmin,
-// } = require("../../services/admin/admin")
+// const admin = require("../../services/admin/admin")
 //
 // const adminCreate = async (req, res) => {
 //   try {
@@ -41,7 +31,7 @@
 //       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
 //     }
 //
-//     const user = await createAdmin(req.body)
+//     const user = await admin.createAdmin(req.body)
 //
 //     console.log(user, 'user 222222 lllllllllllllllll')
 //
@@ -61,7 +51,7 @@
 //       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
 //     }
 //
-//     const resp = await loginAdmin({ email, password })
+//     const resp = await admin.loginAdmin({ email, password })
 //
 //     if (!(Object.keys(resp).length > 0)) {
 //       return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
@@ -76,7 +66,7 @@
 //
 // const adminLogout = async (req, res) => {
 //   try {
-//     const tokens = await logoutAdmin(req.body)
+//     const tokens = await admin.logoutAdmin(req.body)
 //
 //     responseHandler.success(res, "Admin logout successfully", tokens)
 //   }
@@ -87,7 +77,7 @@
 //
 // const adminsData = async (req, res) => {
 //   try {
-//     const data = await getAdmins()
+//     const data = await admin.getAdmins()
 //
 //     responseHandler.success(res, "Admins Fetched successfully", data)
 //   }
@@ -100,7 +90,7 @@
 //   try {
 //     const { id = '' } = req?.params
 //
-//     const data = await getAdmin(id)
+//     const data = await admin.getAdmin(id)
 //
 //     responseHandler.success(res, "Admin Data Fetched successfully", data)
 //   }
@@ -113,7 +103,7 @@
 //   try {
 //     const { id = '' } = req?.params
 //
-//     const data = await getAdminActivities(id)
+//     const data = await admin.getAdminActivities(id)
 //
 //     responseHandler.success(res, "Admin Data Fetched successfully", data)
 //   }
@@ -127,7 +117,7 @@
 //     const { id = '' } = req?.params
 //     const { number, email, password, ...rest } = req?.body
 //
-//     await updateAdmin(id, rest)
+//     await admin.updateAdmin(id, rest)
 //
 //     await addActivity(AdminActivities, id, "ADMIN_UPDATED", "admin updated")
 //
@@ -146,7 +136,7 @@
 //       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
 //     }
 //
-//     await deleteAdmin(id)
+//     await admin.deleteAdmin(id)
 //
 //     await addActivity(AdminActivities, id, "ADMIN_DELETED", "admin deleted")
 //
@@ -165,7 +155,7 @@
 //       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
 //     }
 //
-//     await restoreAdmin(id)
+//     await admin.restoreAdmin(id)
 //
 //     await addActivity(AdminActivities, id, "ADMIN_RESTORED", "admin restored")
 //

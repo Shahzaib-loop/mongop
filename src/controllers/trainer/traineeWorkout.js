@@ -4,9 +4,7 @@ const responseHandler = require('../../utils/responseHandler')
 const { addActivity } = require("../../utils/activities")
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
-const {
-  createTraineeWorkout,
-} = require('../../services/trainer/trainerWorkouts')
+const trainerWorkouts = require('../../services/trainer/trainerWorkouts')
 
 // =======>>> Workout by Trainer for Trainee
 const traineeWorkoutData = async (req, res) => {
@@ -28,7 +26,7 @@ const traineeWorkoutCreate = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    let workout = await createTraineeWorkout({ ...req.body, traineeId })
+    let workout = await trainerWorkouts.createTraineeWorkout({ ...req.body, traineeId })
 
     console.log(workout, "workout tttttttttttt")
 

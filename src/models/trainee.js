@@ -47,6 +47,30 @@ const trainees = sequelize.define("trainees", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  rating: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  address: {
+    type: DataTypes.STRING,
+  },
+  age: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  weight: {
+    type: DataTypes.DECIMAL,
+  },
+  height: {
+    type: DataTypes.DECIMAL,
+  },
+  medicalCondition: {
+    type: DataTypes.STRING,
+  },
+  goal: {
+    type: DataTypes.STRING,
+  },
   deleted: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -59,6 +83,10 @@ const trainees = sequelize.define("trainees", {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
-})
+},
+  {
+    timestamps: true
+  }
+)
 
 module.exports = trainees

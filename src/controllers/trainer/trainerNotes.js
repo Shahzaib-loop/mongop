@@ -3,12 +3,7 @@ const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
 const { addActivity } = require("../../utils/activities")
 // const TrainerActivities = db.sequelize.model('trainer_activities')
-const {
-  getTrainerNote,
-  createTrainerNote,
-  updateTrainerNote,
-  deleteTrainerNote,
-} = require("../../services/trainer/trainerNotes")
+const trainerNotes = require("../../services/trainer/trainerNotes")
 
 const trainerNoteData = async (req, res) => {
   try {

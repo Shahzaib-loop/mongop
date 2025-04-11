@@ -1,38 +1,28 @@
 const express = require('express')
 const router = express.Router()
-const {
-  gymCreate,
-  gymLogin,
-  gymLogout,
-  gymsData,
-  gymData,
-  gymActivities,
-  gymUpdate,
-  gymDelete,
-  gymRestore,
-  addGymTrainer,
-  addGymTrainee,
-} = require('../../controllers/gym')
+const gym = require('../../controllers/gym/gym')
+const gymTrainer = require('../../controllers/gym/gymTrainer')
+const gymTrainee = require('../../controllers/gym/gymTrainee')
 
 // for testing only
 router.get('/listen', (req, res, next) => {
   res.json({ title: 'I am Gym', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-router.post('/register', gymCreate)
-router.post('/login', gymLogin)
-router.post('/logout', gymLogout)
+router.post('/register', gym.gymCreate)
+router.post('/login', gym.gymLogin)
+router.post('/logout', gym.gymLogout)
 
-router.get('/', gymsData)
-router.get('/:id', gymData)
-router.get('/activities/:id', gymActivities)
+router.get('/', gym.gymsData)
+router.get('/:id', gym.gymData)
+router.get('/activities/:id', gym.gymActivities)
 
-router.post('/create', gymCreate)
-router.post('/update/:id', gymUpdate)
-router.post('/delete/:id', gymDelete)
-router.post('/restore/:id', gymRestore)
+router.post('/create', gym.gymCreate)
+router.post('/update/:id', gym.gymUpdate)
+router.post('/delete/:id', gym.gymDelete)
+router.post('/restore/:id', gym.gymRestore)
 
-router.post('/addtrainer/:id', addGymTrainer)
-router.post('/addtrainee/:id', addGymTrainee)
+router.post('/addtrainer/:id', gymTrainer.addGymTrainer)
+router.post('/addtrainee/:id', gymTrainee.addGymTrainee)
 
 module.exports = router
