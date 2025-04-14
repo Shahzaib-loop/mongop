@@ -7,7 +7,7 @@ const Trainer = db.sequelize.model('trainers')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 const trainer = require("../../services/trainer/trainer")
 
-const trainerLogin = async (req, res) => {
+exports.trainerLogin = async (req, res) => {
   try {
     const { email = '', password = '' } = req?.body
 
@@ -28,7 +28,7 @@ const trainerLogin = async (req, res) => {
   }
 }
 
-const trainerLogout = async (req, res) => {
+exports.trainerLogout = async (req, res) => {
   try {
     const tokens = await trainer.logoutTrainer(req.body)
 
@@ -39,7 +39,7 @@ const trainerLogout = async (req, res) => {
   }
 }
 
-const trainerActivities = async (req, res) => {
+exports.trainerActivities = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
@@ -56,9 +56,9 @@ const trainerActivities = async (req, res) => {
   }
 }
 
-const trainersData = async (req, res) => {
+exports.trainersData = async (req, res) => {
   try {
-    const data = await trainer.getTrainers()
+    const data = await trainer.getAllTrainers()
 
     responseHandler.success(res, "Trainees Fetched successfully", data)
   }
@@ -67,7 +67,7 @@ const trainersData = async (req, res) => {
   }
 }
 
-const trainerData = async (req, res) => {
+exports.trainerData = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
@@ -75,7 +75,7 @@ const trainerData = async (req, res) => {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    const data = await trainer.getTrainer(id)
+    const data = await trainer.getTrainerById(id)
 
     responseHandler.success(res, "Trainer Data Fetched successfully", data)
   }
@@ -84,11 +84,11 @@ const trainerData = async (req, res) => {
   }
 }
 
-const trainerCreate = async (req, res) => {
+exports.trainerCreate = async (req, res) => {
   try {
     const tempPassword = 'tester'
     const {
-      gymId = '',
+      gym_id = '',
       firstName = '',
       lastName = '',
       email = '',
@@ -119,7 +119,7 @@ const trainerCreate = async (req, res) => {
   }
 }
 
-const trainerUpdate = async (req, res) => {
+exports.trainerUpdate = async (req, res) => {
   try {
     const { id = '' } = req?.params
     const { number, email, password, ...rest } = req?.body
@@ -139,7 +139,7 @@ const trainerUpdate = async (req, res) => {
   }
 }
 
-const trainerDelete = async (req, res) => {
+exports.trainerDelete = async (req, res) => {
   try {
     const { id = '', } = req?.params
 
@@ -158,7 +158,7 @@ const trainerDelete = async (req, res) => {
   }
 }
 
-const trainerRestore = async (req, res) => {
+exports.trainerRestore = async (req, res) => {
   try {
     const { id = '', } = req?.params
 
@@ -175,16 +175,4 @@ const trainerRestore = async (req, res) => {
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
-}
-
-module.exports = {
-  trainerLogin,
-  trainerLogout,
-  trainerActivities,
-  trainersData,
-  trainerData,
-  trainerCreate,
-  trainerUpdate,
-  trainerDelete,
-  trainerRestore,
 }

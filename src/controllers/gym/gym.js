@@ -1,58 +1,67 @@
 const db = require('../../models')
+const bcrypt = require("bcryptjs")
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
+const User = db.sequelize.model('unified_user_data')
 const Gym = db.sequelize.model('gyms')
 // const GymActivities = db.sequelize.model('gym_activities')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
-const { createTrainer } = require('../../services/trainer/trainer')
+const user = require("../../services/user/user")
 const gym = require("../../services/gym/gym")
+const trainer = require('../../services/trainer/trainer')
+const { generateTokens } = require('../../utils/auth');
 
 //  when register api hit, it will just add data & send code to email or number
 //  after verification the account will register & user will login with access & refresh tokens
 //  there will be timer to verify, when timer ends the user will be soft deleted
 
-const gymLogin = async (req, res) => {
+exports.gymLogin = async (req, res) => {
   try {
     const { email = '', password = '' } = req?.body
 
     if (!(email && password)) {
       logger.info(`Gym Login Failed as 
-      ${ !(email && password)
+        ${ !(email && password)
         ? 'email and password'
         : !email ? 'email' : 'password' } 
         are empty`)
       return responseHandler.unauthorized(
         res,
-        "Email or Password is Incorrect",
-        "email or password is incorrect or no data found"
+        "Invalid Email or Password",
+        "email or password is incorrect"
       )
     }
 
-    const resp = await gym.loginGym({ email, password })
-
-    if (!(Object.keys(resp).length > 0)) {
-      logger.info(`Gym Login Failed as 
-      ${ !(email && password)
-        ? 'email and password'
-        : !email ? 'email' : 'password' } 
-        are empty`)
+    const user = await User.findOne({ where: { email } })
+    if (!user) {
       return responseHandler.unauthorized(
         res,
-        "Email or Password is Incorrect",
+        "Invalid Email or Password",
         "email or password is incorrect or no data found"
       )
     }
 
-    responseHandler.success(res, "Gym Login successfully", resp)
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+      return responseHandler.unauthorized(
+        res,
+        "Invalid Email or Password",
+        "email or password is incorrect or incorrect data"
+      )
+    }
+
+    const token = generateTokens(user)
+
+    return responseHandler.success(res, "Gym Login successfully", { token, role: user.role })
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
   }
 }
 
-const gymLogout = async (req, res) => {
+exports.gymLogout = async (req, res) => {
   try {
     const { refreshToken = '' } = req?.body
 
@@ -78,7 +87,7 @@ const gymLogout = async (req, res) => {
   }
 }
 
-const gymActivities = async (req, res) => {
+exports.gymActivities = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
@@ -91,9 +100,9 @@ const gymActivities = async (req, res) => {
   }
 }
 
-const gymsData = async (req, res) => {
+exports.gymsData = async (req, res) => {
   try {
-    const data = await gym.getGyms()
+    const data = await gym.getAllGyms()
 
     responseHandler.success(res, "Gyms Fetched successfully", data)
   }
@@ -102,11 +111,11 @@ const gymsData = async (req, res) => {
   }
 }
 
-const gymData = async (req, res) => {
+exports.gymData = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
-    const data = await gym.getGym(id)
+    const data = await gym.getGymById(id)
 
     responseHandler.success(res, "Gym Data Fetched successfully", data)
   }
@@ -115,13 +124,13 @@ const gymData = async (req, res) => {
   }
 }
 
-const gymCreate = async (req, res) => {
+exports.gymCreate = async (req, res) => {
   const t = await db.sequelize.transaction()
 
   try {
     const {
       name = '',
-      ownerName = '',
+      owner_name = '',
       email = '',
       number = '',
       password = '',
@@ -129,10 +138,10 @@ const gymCreate = async (req, res) => {
       state = '',
       city = '',
       country = '',
-      zipCode = '',
+      zip_code = '',
     } = req?.body
 
-    if (!(name && ownerName && email && number && password && address && state && city && country && zipCode)) {
+    if (!(name && owner_name && email && number && password && address && state && city && country && zip_code)) {
       return responseHandler.error(
         res,
         400,
@@ -147,28 +156,66 @@ const gymCreate = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let gym
-    let trainer
-    let trainerData = {
+    let trainerDatum = {
       role: 'trainer',
-      firstName: name,
-      lastName: name,
+      first_name: name,
+      last_name: name,
       email,
       number,
       password,
+      trainer_type: 'default',
     }
 
-    gym = await gym.createGym(req.body, t)
-    trainer = await createTrainer({ ...trainerData, gymId: gym.id, trainerType: 'default' }, t)
+    const hashedPassword = await bcrypt.hash(password, 10)
 
-    // await addActivity(GymActivities, 'gymId', gym?.id, "GYM_CREATED", "gym registered", t)
-    // await addActivity(TrainerActivities, 'trainerId', trainer?.id, "DEFAULT_TRAINER_CREATED", "default trainer
+    // =====>>>>>>> gym creation
+    const gymData = await gym.createGym(req.body, t,)
+
+    const gymUser = await user.createUser({ linked_id: gymData.id, email, password: hashedPassword, role: 'gym' }, t)
+
+    await gym.updateGym(gymData.id, { user_id: gymUser.id }, t)
+
+    // =====>>>>>>> default trainer creation
+    const trainerData = await trainer.createTrainer({ ...trainerDatum, gym_id: gymData.id }, t,)
+
+    const trainerUser = await user.createUser(
+      {
+        email,
+        linked_id: trainerData.id,
+        password: hashedPassword,
+        role: 'trainer'
+      },
+      t,
+    )
+
+    await trainer.updateTrainer(trainerData.id, { user_id: trainerUser.id }, t)
+
+    // await addActivity(GymActivities, 'gym_id', gym?.id, "GYM_CREATED", "gym registered", t)
+    // await addActivity(TrainerActivities, 'trainer_id', trainer?.id, "DEFAULT_TRAINER_CREATED", "default trainer
     // created", t)
 
     await t.commit()
 
     logger.info("Gym Created")
-    responseHandler.created(res, "Gym Registered successfully", gym)
+
+    responseHandler.created(
+      res,
+      "Gym Registered successfully, Default Trainer also Registered",
+      {
+        id: gymData.id,
+        name: gymData.name,
+        address: gymData.address,
+        email: gymUser.email,
+        role: gymUser.role,
+        gymTrainer: {
+          id: trainerData.id,
+          name: trainerData.name,
+          address: trainerData.address,
+          email: trainerUser.email,
+          role: trainerUser.role,
+        },
+      }
+    )
   }
   catch (error) {
     await t.rollback()
@@ -177,7 +224,7 @@ const gymCreate = async (req, res) => {
   }
 }
 
-const gymUpdate = async (req, res) => {
+exports.gymUpdate = async (req, res) => {
   try {
     const { id = '' } = req?.params
     const { number, email, password, ...rest } = req?.body
@@ -193,7 +240,7 @@ const gymUpdate = async (req, res) => {
 
     await gym.updateGym(id, rest)
 
-    // await addActivity(GymActivities, 'gymId', id, "GYM_UPDATED", "gym updated")
+    // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 
     responseHandler.success(res, "Gym Updated successfully")
   }
@@ -202,7 +249,7 @@ const gymUpdate = async (req, res) => {
   }
 }
 
-const gymDelete = async (req, res) => {
+exports.gymDelete = async (req, res) => {
   try {
     const { id = '', } = req?.params
 
@@ -217,7 +264,7 @@ const gymDelete = async (req, res) => {
 
     await gym.deleteGym(id)
 
-    // await addActivity(GymActivities, 'gymId', id, "GYM_DELETED", "gym deleted")
+    // await addActivity(GymActivities, 'gym_id', id, "GYM_DELETED", "gym deleted")
 
     responseHandler.success(res, "Gym Deleted successfully")
   }
@@ -226,7 +273,7 @@ const gymDelete = async (req, res) => {
   }
 }
 
-const gymRestore = async (req, res) => {
+exports.gymRestore = async (req, res) => {
   try {
     const { id = '', } = req?.params
 
@@ -241,23 +288,11 @@ const gymRestore = async (req, res) => {
 
     await gym.restoreGym(id)
 
-    // await addActivity(GymActivities, 'gymId', id, "GYM_RESTORED", "gym restored")
+    // await addActivity(GymActivities, 'gym_id', id, "GYM_RESTORED", "gym restored")
 
     responseHandler.success(res, "Gym Restored successfully")
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
-}
-
-module.exports = {
-  gymLogin,
-  gymLogout,
-  gymActivities,
-  gymsData,
-  gymData,
-  gymCreate,
-  gymUpdate,
-  gymDelete,
-  gymRestore,
 }

@@ -10,15 +10,15 @@ const Trainee = db.sequelize.model('trainees')
 const trainer = require('../../services/trainer/trainer')
 const trainerTrainee = require('../../services/trainer/trainerTrainee')
 
-const trainerTraineeData = async (req, res) => {
+exports.trainerTraineeData = async (req, res) => {
   try {
-    const { trainerId = '', } = req?.body
+    const { trainer_id = '', } = req?.body
 
-    if (!(trainerId)) {
+    if (!(trainer_id)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    let traineesData = await trainerTrainee.getTrainerTrainee(trainerId)
+    let traineesData = await trainerTrainee.getTrainerTrainee(trainer_id)
 
     responseHandler.success(res, "Trainees Fetched Successfully", traineesData)
   }
@@ -27,12 +27,12 @@ const trainerTraineeData = async (req, res) => {
   }
 }
 
-const trainerTraineeUpdate = async (req, res) => {
+exports.trainerTraineeUpdate = async (req, res) => {
   try {
     const { id = '' } = req?.params
-    const { trainerId, email, number, ...rest } = req?.body
+    const { trainer_id, email, number, ...rest } = req?.body
 
-    if (!(id && trainerId && rest?.firstName?.length > 0 && rest?.lastName?.length > 0)) {
+    if (!(id && trainer_id && rest?.firstName?.length > 0 && rest?.lastName?.length > 0)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
@@ -46,14 +46,14 @@ const trainerTraineeUpdate = async (req, res) => {
 
     // await addActivity(
     //   trainerActivities,
-    //   'trainerId',
-    //   trainerId,
+    //   'trainer_id',
+    //   trainer_id,
     //   'TRAINER_UPDATED_TRAINEE',
     //   'trainer updated trainee'
     // )
     // await addActivity(
     //   traineeActivities,
-    //   'traineeId',
+    //   'trainee_id',
     //   id,
     //   'TRAINEE_UPDATED_BY_TRAINER',
     //   'trainee updated by trainer'
@@ -66,12 +66,12 @@ const trainerTraineeUpdate = async (req, res) => {
   }
 }
 
-const trainerTraineeUpdatePassword = async (req, res) => {
+exports.trainerTraineeUpdatePassword = async (req, res) => {
   try {
     const { id = '' } = req?.params
-    const { trainerId = '', password = '' } = req?.body
+    const { trainer_id = '', password = '' } = req?.body
 
-    if (!(trainerId && password)) {
+    if (!(trainer_id && password)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
   }
@@ -80,23 +80,16 @@ const trainerTraineeUpdatePassword = async (req, res) => {
   }
 }
 
-const trainerTraineeUpdateEmail = async (req, res) => {
+exports.trainerTraineeUpdateEmail = async (req, res) => {
   try {
     const { id } = req?.params
-    const { trainerId = '', password = '' } = req?.body
+    const { trainer_id = '', password = '' } = req?.body
 
-    if (!(trainerId && password)) {
+    if (!(trainer_id && password)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
-}
-
-module.exports = {
-  trainerTraineeData,
-  trainerTraineeUpdate,
-  trainerTraineeUpdatePassword,
-  trainerTraineeUpdateEmail,
 }

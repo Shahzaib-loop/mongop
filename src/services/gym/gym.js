@@ -1,36 +1,28 @@
 const db = require("../../models")
-const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../../utils/auth')
+const User = db.sequelize.model('unified_user_data')
 const Gym = db.sequelize.model('gyms')
 const Trainee = db.sequelize.model('trainees')
 const Trainer = db.sequelize.model('trainers')
 // const GymActivities = db.sequelize.model('gym_activities')
 
-const createGym = async (data, t) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10)
+// const loginGym = async ({ email, password }) => {
+//   const gym = await Gym.findOne({ where: { email }, raw: true })
+//
+//   if (!(Object.keys(gym).length > 0)) return false
+//
+//   const isMatch = await bcrypt.compare(password, gym.password)
+//
+//   if (!isMatch) return false
+//
+//   const tokens = generateTokens(gym)
+//
+//   if (!(Object.keys(tokens).length > 0)) return false
+//
+//   return { gym, tokens }
+// }
 
-  let gym = await Gym.create({ ...data, password: hashedPassword }, { transaction: t })
-
-  return gym
-}
-
-const loginGym = async ({ email, password }) => {
-  const gym = await Gym.findOne({ where: { email }, raw: true })
-
-  if (!(Object.keys(gym).length > 0)) return false
-
-  const isMatch = await bcrypt.compare(password, gym.password)
-
-  if (!isMatch) return false
-
-  const tokens = generateTokens(gym)
-
-  if (!(Object.keys(tokens).length > 0)) return false
-
-  return { gym, tokens }
-}
-
-const logoutGym = async (refreshToken) => {
+exports.logoutGym = async (refreshToken) => {
   try {
     // In a production environment, you would want to:
     // 1. Add the refresh token to a blacklist in Redis/database
@@ -43,26 +35,34 @@ const logoutGym = async (refreshToken) => {
   }
 }
 
-const getGyms = async () => {
+exports.getGymActivities = async (id) => {
+  // return GymActivities.findAll({ where: { gym_id: id }, })
+}
+
+exports.getAllGyms = async () => {
   return Gym.findAll({
     include: [
-      {
-        // model: GymActivities,
-        as: 'gymActivities'
-      },
+      // {
+      //   model: GymActivities,
+      //   as: 'gymActivities'
+      // },
       {
         model: Trainee,
-        as: 'gymTrainee'
+        as: 'gym_trainee'
       },
       {
         model: Trainer,
-        as: 'gymTrainer'
+        as: 'gym_trainer'
+      },
+      {
+        model: User,
+        as: 'gym_users'
       },
     ]
   })
 }
 
-const getGym = async (id) => {
+exports.getGymById = async (id) => {
   return Gym.findOne({
     where: { id },
     include: [
@@ -80,55 +80,44 @@ const getGym = async (id) => {
           },
         ]
       },
-
+      {
+        model: User,
+        as: 'gym_users'
+      },
     ]
   })
 }
 
-const getGymActivities = async (id) => {
-  // return GymActivities.findAll({ where: { gymId: id }, })
+exports.createGym = async (data, t) => {
+  return await Gym.create(data, { transaction: t })
 }
 
-const updateGym = async (id, data) => {
+exports.updateGym = async (id, data) => {
   return Gym.update(data, { where: { id } })
 }
 
-const deleteGym = async (id) => {
+exports.deleteGym = async (id) => {
   return Gym.update({ deleted: true }, { where: { id } })
 }
 
-const restoreGym = async (id) => {
+exports.restoreGym = async (id) => {
   return Gym.update({ deleted: false }, { where: { id } })
 }
 
-const getGymTrainer = async (gymId) => {
+exports.getGymTrainer = async (gym_id) => {
   return Trainer.findOne({
-    where: { gymId },
+    where: { gym_id },
     // include: {
     //   model: TrainerActivities,
     // }
   })
 }
 
-const getAllGymTrainers = async (gymId) => {
+exports.getAllGymTrainers = async (gym_id) => {
   return Trainer.findAll({
-    where: { gymId },
+    where: { gym_id },
     // include: {
     //   model: TrainerActivities,
     // }
   })
-}
-
-module.exports = {
-  createGym,
-  loginGym,
-  logoutGym,
-  getGyms,
-  getGym,
-  getGymActivities,
-  updateGym,
-  deleteGym,
-  restoreGym,
-  getGymTrainer,
-  getAllGymTrainers,
 }

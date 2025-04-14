@@ -3,7 +3,7 @@ const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
 const traineeNotes = require("../../services/trainee/traineeNotes")
 
-const traineeNoteData = async (req, res) => {
+exports.traineeNoteData = async (req, res) => {
   try {
     // iski zarorat shayad na paray kunke jab workout get hoon gat to join se ye notes sath ain gay hr workout ke
 
@@ -16,22 +16,22 @@ const traineeNoteData = async (req, res) => {
   }
 }
 
-const traineeNoteCreate = async (req, res) => {
+exports.traineeNoteCreate = async (req, res) => {
   try {
     const { id } = req?.params //  workoutId
-    const { traineeId, description } = req?.body // traineeId
+    const { trainee_id, description } = req?.body // trainee_id
 
-    // workout ke against note save hoga or traineeId params se mil rhi hogi as traineeNotes
+    // workout ke against note save hoga or trainee_id params se mil rhi hogi as traineeNotes
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
 }
 
-const traineeNoteUpdate = async (req, res) => {
+exports.traineeNoteUpdate = async (req, res) => {
   try {
     const { id } = req?.params //  noteId
-    const { traineeId, ...rest } = req?.body // traineeId remove krni ha, cant be updated
+    const { trainee_id, ...rest } = req?.body // trainee_id remove krni ha, cant be updated
 
     // noteId ke against note save hoga
   }
@@ -40,7 +40,7 @@ const traineeNoteUpdate = async (req, res) => {
   }
 }
 
-const traineeNoteDelete = async (req, res) => {
+exports.traineeNoteDelete = async (req, res) => {
   try {
     const { id } = req?.params //  noteId
 
@@ -49,11 +49,4 @@ const traineeNoteDelete = async (req, res) => {
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
-}
-
-module.exports = {
-  traineeNoteData,
-  traineeNoteCreate,
-  traineeNoteUpdate,
-  traineeNoteDelete,
 }

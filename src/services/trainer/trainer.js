@@ -26,14 +26,14 @@ const logoutTrainer = async (email) => {
 }
 
 const getTrainerActivities = async (id) => {
-  // return TrainerActivities.findAll({ where: { trainerId: id }, })
+  // return TrainerActivities.findAll({ where: { trainer_id: id }, })
 }
 
-const getTrainers = async () => {
+const getAllTrainers = async () => {
   return Trainer.findAll({ where: { deleted: false } })
 }
 
-const getTrainer = async (id) => {
+const getTrainerById = async (id) => {
   return Trainer.findOne({
     where: { id, deleted: false, },
     include: [
@@ -65,12 +65,12 @@ const restoreTrainer = async () => {
 }
 
 module.exports = {
-  createTrainer,
   loginTrainer,
   logoutTrainer,
-  getTrainers,
-  getTrainer,
   getTrainerActivities,
+  getAllTrainers,
+  getTrainerById,
+  createTrainer,
   updateTrainer,
   deleteTrainer,
   restoreTrainer,

@@ -4,7 +4,7 @@ const gym = require('../../controllers/gym/gym')
 const gymTrainer = require('../../controllers/gym/gymTrainer')
 const gymTrainee = require('../../controllers/gym/gymTrainee')
 
-// for testing only
+// health check
 router.get('/listen', (req, res, next) => {
   res.json({ title: 'I am Gym', Message: `I'm listening on ${ process.env.PORT }` })
 })

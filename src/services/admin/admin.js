@@ -4,16 +4,6 @@ const { generateTokens } = require('../../utils/auth')
 const Admin = db.sequelize.model('admins')
 const AdminActivities = db.sequelize.model('admin_activities')
 
-const createAdmin = async (data) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10)
-
-  let user = await Admin.create({ ...data, password: hashedPassword })
-
-  console.log(user, "2222 dataaaaaaaaaaaaa")
-
-  return user
-}
-
 const loginAdmin = async ({ email = '', password = '' }) => {
   const admin = await Admin.findOne({ where: { email }, raw: true })
 
@@ -34,21 +24,31 @@ const logoutAdmin = async (email = '') => {
   return email
 }
 
-const getAdmins = async () => {
+const getAdminActivities = async (id) => {
+  return AdminActivities.findAll({ where: { adminId: id }, })
+}
+
+const getAllAdmins = async () => {
   return Admin.findAll()
 }
 
-const getAdmin = async (id) => {
+const getAdminById = async (id) => {
   return Admin.findOne({
     where: { id },
-    include: {
-      model: AdminActivities,
-    }
+    // include: {
+    //   model: AdminActivities,
+    // }
   })
 }
 
-const getAdminActivities = async (id) => {
-  return AdminActivities.findAll({ where: { adminId: id }, })
+const createAdmin = async (data) => {
+  const hashedPassword = await bcrypt.hash(data.password, 10)
+
+  let user = await Admin.create({ ...data, password: hashedPassword })
+
+  console.log(user, "2222 dataaaaaaaaaaaaa")
+
+  return user
 }
 
 const updateAdmin = async (id, data) => {
@@ -64,12 +64,12 @@ const restoreAdmin = async (id) => {
 }
 
 module.exports = {
-  createAdmin,
   loginAdmin,
   logoutAdmin,
-  getAdmins,
-  getAdmin,
   getAdminActivities,
+  getAllAdmins,
+  getAdminById,
+  createAdmin,
   updateAdmin,
   deleteAdmin,
   restoreAdmin,

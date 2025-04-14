@@ -10,7 +10,7 @@ const trainee = require('../../services/trainee/trainee')
 const gym = require('../../services/gym/gym')
 const bcrypt = require('bcryptjs');
 
-const addGymTrainee = async (req, res) => {
+exports.addGymTrainee = async (req, res) => {
   try {
     //  abhi ke liye gym directly trainee add ni kr sakta usko default trainer se
     //  login krke trainee ko manage krna hoga
@@ -41,7 +41,7 @@ const addGymTrainee = async (req, res) => {
     const tempPassword = 'tester'
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-    let trainee = await trainee.createTrainee({ ...req.body, gymId: id, trainerId: trainerData.id, password: hashedPassword })
+    let trainee = await trainee.createTrainee({ ...req.body, gym_id: id, trainer_id: trainerData.id, password: hashedPassword })
 
     if (!(Object.keys(trainee).length > 0)) {
       responseHandler.error(res, 400, "", "",)
@@ -49,14 +49,14 @@ const addGymTrainee = async (req, res) => {
 
     // await addActivity(
     //   GymActivities,
-    //   'gymId',
+    //   'gym_id',
     //   id,
     //   "GYM_ADDED_TRAINEE",
     //   "gym added trainee"
     // )
     // await addActivity(
     //   TraineeActivities,
-    //   'traineeId',
+    //   'trainee_id',
     //   trainee.id,
     //   "TRAINEE_CREATED_BY_GYM",
     //   "trainee created by gym"
@@ -69,14 +69,8 @@ const addGymTrainee = async (req, res) => {
   }
 }
 
-const updateGymTrainee = async (data) => {
+exports.updateGymTrainee = async (data) => {
 }
 
-const deleteGymTrainee = async (data) => {
-}
-
-module.exports = {
-  addGymTrainee,
-  updateGymTrainee,
-  deleteGymTrainee,
+exports.deleteGymTrainee = async (data) => {
 }

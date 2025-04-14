@@ -22,11 +22,11 @@ const addActivity = async (model, idField, idValue, action, activity, t) => {
 //   }
 // }
 
-const addAdminActivity = async (model, gymId, action, activity) => {
+const addAdminActivity = async (model, gym_id, action, activity) => {
   try {
-    console.log("Add Activity Data: ", model, gymId, action, activity)
+    console.log("Add Activity Data: ", model, gym_id, action, activity)
 
-    return model.create({ gymId, action, activity })
+    return model.create({ gym_id, action, activity })
   }
   catch (err) {
     logger.error({ message: `Error Creating ${ model } Activity: ${ err }` })

@@ -7,7 +7,7 @@ const { addActivity } = require("../../utils/activities")
 const trainerWorkouts = require('../../services/trainer/trainerWorkouts')
 
 // =======>>> Workout by Trainer for Trainee
-const traineeWorkoutData = async (req, res) => {
+exports.traineeWorkoutData = async (req, res) => {
   try {
   }
   catch (error) {
@@ -15,32 +15,32 @@ const traineeWorkoutData = async (req, res) => {
   }
 }
 
-const traineeWorkoutCreate = async (req, res) => {
+exports.traineeWorkoutCreate = async (req, res) => {
   try {
     //  when trainer edits trainee workout then trainee id will be used to add/update workout
 
-    const { traineeId = '' } = req?.params
-    const { trainerId = '', exerciseType = '', sets = 0, reps = 0 } = req?.body
+    const { trainee_id = '' } = req?.params
+    const { trainer_id = '', exerciseType = '', sets = 0, reps = 0 } = req?.body
 
-    if (!(traineeId && trainerId && exerciseType && sets && reps)) {
+    if (!(trainee_id && trainer_id && exerciseType && sets && reps)) {
       return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
     }
 
-    let workout = await trainerWorkouts.createTraineeWorkout({ ...req.body, traineeId })
+    let workout = await trainerWorkouts.createTraineeWorkout({ ...req.body, trainee_id })
 
     console.log(workout, "workout tttttttttttt")
 
     // await addActivity(
     //   TraineeActivities,
-    //   'traineeId',
-    //   traineeId,
+    //   'trainee_id',
+    //   trainee_id,
     //   "WORKOUT_ADDED_FOR_TRAINEE",
     //   "workout added for trainee"
     // )
     // await addActivity(
     //   TrainerActivities,
-    //   'trainerId',
-    //   trainerId,
+    //   'trainer_id',
+    //   trainer_id,
     //   "TRAINER_ADDED_WORKOUT",
     //   "trainer added workout"
     // )
@@ -52,7 +52,7 @@ const traineeWorkoutCreate = async (req, res) => {
   }
 }
 
-const traineeWorkoutUpdate = async (req, res) => {
+exports.traineeWorkoutUpdate = async (req, res) => {
   try {
 
   }
@@ -61,18 +61,11 @@ const traineeWorkoutUpdate = async (req, res) => {
   }
 }
 
-const traineeWorkoutDelete = async (req, res) => {
+exports.traineeWorkoutDelete = async (req, res) => {
   try {
 
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
-}
-
-module.exports = {
-  traineeWorkoutData,
-  traineeWorkoutCreate,
-  traineeWorkoutUpdate,
-  traineeWorkoutDelete,
 }

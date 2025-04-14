@@ -38,18 +38,21 @@ const pool = new Pool({
 //     .then(() => logger.info("PostgreSQL Connected Successfully"))
 //     .catch(err => logger.error(`PostgreSQL connection Error: ${err}`))
 
-const sequelize = new Sequelize(pgdb.database, 'postgres', pgdb.password, {
-  host: pgdb.host,
-  dialect: 'postgres',
-  logging: false,
-
-  pool: {
-    max: Number(pgdb.max) || 10,
-    min: Number(pgdb.max) || 1,
-    acquire: 30000,
-    idle: 10000,
-  },
-})
+const sequelize = new Sequelize(
+  pgdb.database,
+  'postgres',
+  pgdb.password,
+  {
+    host: pgdb.host,
+    dialect: 'postgres',
+    logging: false,
+    pool: {
+      max: Number(pgdb.max) || 10,
+      min: Number(pgdb.max) || 1,
+      acquire: 30000,
+      idle: 10000,
+    },
+  })
 
 module.exports = { connectDB, sequelize, pool }
 

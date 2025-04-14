@@ -37,7 +37,7 @@ router.post('/trainee/restore/:id', trainee.traineeRestore)
 
 // ==========>>>> Workouts
 router.get('/workouts/:id', traineeWorkout.traineeWorkoutData)
-router.post('/workouts/create/:traineeId', traineeWorkout.traineeWorkoutCreate)
+router.post('/workouts/create/:trainee_id', traineeWorkout.traineeWorkoutCreate)
 router.post('/workouts/update/:id', traineeWorkout.traineeWorkoutUpdate)
 router.post('/workouts/delete/:id', traineeWorkout.traineeWorkoutDelete)
 

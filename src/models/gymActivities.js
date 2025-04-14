@@ -8,7 +8,7 @@
 //     allowNull: false,
 //     primaryKey: true,
 //   },
-//   gymId: {
+//   gym_id: {
 //     type: DataTypes.UUID,
 //     allowNull: false,
 //   },

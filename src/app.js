@@ -7,8 +7,6 @@ const logger = require('./utils/logger')
 const { checkAuthentication } = require('./utils/auth')
 const responseHandler = require('./utils/responseHandler')
 
-const indexRouter = require('./routes/index')
-
 app.use(cors())
 app.use(morgan("dev"))
 app.use(express.json())
@@ -35,7 +33,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/api', indexRouter)
+app.use('/api', require('./routes/index'))
 
 
 app.get('/healthcheck', (req, res) => res.status(200).send({ status: 'ok', health: 'ok', }))

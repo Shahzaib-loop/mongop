@@ -8,17 +8,17 @@
 //     allowNull: false,
 //     primaryKey: true,
 //   },
-//   traineeId: {
+//   trainee_id: {
 //     type: DataTypes.UUID,
 //     allowNull: false,
 //   },
 //   date: {
 //     type: DataTypes.DATE
 //   },
-//   completedSets: {
+//   completed_sets: {
 //     type: DataTypes.INTEGER,
 //   },
-//   completedReps: {
+//   completed_reps: {
 //     type: DataTypes.INTEGER,
 //   },
 //   feedback: {

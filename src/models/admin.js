@@ -8,15 +8,11 @@
 //     allowNull: false,
 //     primaryKey: true,
 //   },
-//   role: {
-//     type: DataTypes.STRING,
-//     defaultValue: "admin",
-//   },
-//   firstName: {
+//   first_name: {
 //     type: DataTypes.STRING,
 //     allowNull: false,
 //   },
-//   lastName: {
+//   last_name: {
 //     type: DataTypes.STRING,
 //   },
 //   email: {
@@ -26,10 +22,6 @@
 //     validate: {
 //       isEmail: true,
 //     },
-//   },
-//   password: {
-//     type: DataTypes.STRING,
-//     allowNull: false,
 //   },
 //   deleted: {
 //     type: DataTypes.BOOLEAN,

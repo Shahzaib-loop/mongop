@@ -26,14 +26,14 @@ const logoutTrainee = async (email) => {
 }
 
 const getTraineeActivities = async (id) => {
-  // return TraineeActivities.findAll({ where: { traineeId: id }, })
+  // return TraineeActivities.findAll({ where: { trainee_id: id }, })
 }
 
-const getTrainees = async (trainerId) => {
-  return Trainee.findAll({ where: { trainerId } })
+const getAllTrainees = async (trainer_id) => {
+  return Trainee.findAll({ where: { trainer_id } })
 }
 
-const getTrainee = async (id) => {
+const getTraineeById = async (id) => {
   return Trainee.findOne({
     where: { id },
     // include: {
@@ -59,12 +59,12 @@ const restoreTrainee = async (id) => {
 }
 
 module.exports = {
-  createTrainee,
   loginTrainee,
   logoutTrainee,
-  getTrainees,
-  getTrainee,
   getTraineeActivities,
+  getAllTrainees,
+  getTraineeById,
+  createTrainee,
   updateTrainee,
   deleteTrainee,
   restoreTrainee,

@@ -8,7 +8,7 @@
 //     allowNull: false,
 //     primaryKey: true,
 //   },
-//   traineeId: {
+//   trainee_id: {
 //     type: DataTypes.UUID,
 //     allowNull: false,
 //   },

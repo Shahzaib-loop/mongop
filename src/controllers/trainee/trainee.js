@@ -9,7 +9,7 @@ const Trainee = db.sequelize.model('trainees')
 const trainee = require("../../services/trainee/trainee")
 const trainer = require('../../services/trainer/trainer')
 
-const traineeLogin = async (req, res) => {
+exports.traineeLogin = async (req, res) => {
   try {
     const { email = '', password = '' } = req?.body
 
@@ -30,7 +30,7 @@ const traineeLogin = async (req, res) => {
   }
 }
 
-const traineeLogout = async (req, res) => {
+exports.traineeLogout = async (req, res) => {
   try {
     const tokens = await trainee.logoutTrainee(req.body)
 
@@ -41,7 +41,7 @@ const traineeLogout = async (req, res) => {
   }
 }
 
-const traineeActivities = async (req, res) => {
+exports.traineeActivities = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
@@ -54,9 +54,9 @@ const traineeActivities = async (req, res) => {
   }
 }
 
-const traineesData = async (req, res) => {
+exports.traineesData = async (req, res) => {
   try {
-    const data = await trainee.trainee.getTrainees()
+    const data = await trainee.trainee.getAllTrainees()
 
     responseHandler.success(res, "Trainees Fetched successfully", data)
   }
@@ -65,11 +65,11 @@ const traineesData = async (req, res) => {
   }
 }
 
-const traineeData = async (req, res) => {
+exports.traineeData = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
-    const data = await trainee.getTrainee(id)
+    const data = await trainee.getTraineeById(id)
 
     responseHandler.success(res, "Trainee Data Fetched successfully", data)
   }
@@ -78,17 +78,17 @@ const traineeData = async (req, res) => {
   }
 }
 
-const traineeCreate = async (req, res) =>  {
+exports.traineeCreate = async (req, res) =>  {
   try {
     const {
-      trainerId = '',
+      trainer_id = '',
       firstName = '',
       lastName = '',
       email = '',
       number = '',
     } = req?.body
 
-    if (!(trainerId && firstName && lastName && email && number)) {
+    if (!(trainer_id && firstName && lastName && email && number)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
@@ -101,16 +101,16 @@ const traineeCreate = async (req, res) =>  {
     const tempPassword = 'tester'
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-    const trainerData = await trainer.getTrainer(trainerId)
+    const trainerData = await trainer.getTrainer(trainer_id)
 
-    if (!(trainerData?.id && trainerData?.gymId)) {
+    if (!(trainerData?.id && trainerData?.gym_id)) {
       return responseHandler.error(res, 500, 'Server Error', 'internal server error')
     }
 
     let trainee = await trainee.createTrainee({
       ...req.body,
-      trainerId,
-      gymId: trainerData.gymId,
+      trainer_id,
+      gym_id: trainerData.gym_id,
       password: hashedPassword
     })
 
@@ -120,14 +120,14 @@ const traineeCreate = async (req, res) =>  {
 
     // await addActivity(
     //   TrainerActivities,
-    //   'trainerId',
-    //   trainerId,
+    //   'trainer_id',
+    //   trainer_id,
     //   "TRAINER_CREATED_TRAINEE",
     //   "trainer created trainee"
     // )
     // await addActivity(
     //   TraineeActivities,
-    //   'traineeId',
+    //   'trainee_id',
     //   trainee.id,
     //   "TRAINEE_CREATED_BY_TRAINER",
     //   "trainee created by trainer"
@@ -140,14 +140,14 @@ const traineeCreate = async (req, res) =>  {
   }
 }
 
-const traineeUpdate = async (req, res) => {
+exports.traineeUpdate = async (req, res) => {
   try {
     const { id = '' } = req?.params
     const { number, email, password, ...rest } = req?.body
 
     await trainee.updateTrainee(id, rest)
 
-    // await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_UPDATED", "trainee updated")
+    // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
 
     responseHandler.success(res, "Trainee Updated successfully")
   }
@@ -156,7 +156,7 @@ const traineeUpdate = async (req, res) => {
   }
 }
 
-const traineeDelete = async (req, res) => {
+exports.traineeDelete = async (req, res) => {
   try {
     const { id = '', } = req?.params
 
@@ -166,7 +166,7 @@ const traineeDelete = async (req, res) => {
 
     await trainee.deleteTrainee(id)
 
-    // await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_DELETED", "trainee deleted")
+    // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_DELETED", "trainee deleted")
 
     responseHandler.success(res, "Trainee Deleted successfully")
   }
@@ -175,7 +175,7 @@ const traineeDelete = async (req, res) => {
   }
 }
 
-const traineeRestore = async (req, res) => {
+exports.traineeRestore = async (req, res) => {
   try {
     const { id = '', } = req?.params
 
@@ -185,23 +185,11 @@ const traineeRestore = async (req, res) => {
 
     await trainee.restoreTrainee(id)
 
-    // await addActivity(TraineeActivities, 'traineeId', id, "TRAINEE_RESTORED", "trainee restored")
+    // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_RESTORED", "trainee restored")
 
     responseHandler.success(res, "Trainee Restored successfully")
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
-}
-
-module.exports = {
-  traineeLogin,
-  traineeLogout,
-  traineeActivities,
-  traineesData,
-  traineeData,
-  traineeCreate,
-  traineeUpdate,
-  traineeDelete,
-  traineeRestore,
 }

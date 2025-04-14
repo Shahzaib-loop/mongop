@@ -9,7 +9,7 @@ const { uniqueCheck } = require('../../utils/uniqueCheck')
 const { addActivity } = require('../../utils/activities')
 const trainer  = require('../../services/trainer/trainer')
 
-const addGymTrainer = async (req, res) => {
+exports.addGymTrainer = async (req, res) => {
   try {
     const { id = '', } = req?.params
     const { firstName = '', lastName = '', email = '', number = '', } = req?.body
@@ -27,7 +27,7 @@ const addGymTrainer = async (req, res) => {
     const tempPassword = 'tester'
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-    let trainerData = await trainer.createTrainer({ ...req.body, gymId: id, trainerType: 'non_default', password: hashedPassword })
+    let trainerData = await trainer.createTrainer({ ...req.body, gym_id: id, trainerType: 'non_default', password: hashedPassword })
 
     if (!(Object.keys(trainer).length > 0)) {
       responseHandler.error(res, 400, "", "",)
@@ -35,14 +35,14 @@ const addGymTrainer = async (req, res) => {
 
     // await addActivity(
     //   GymActivities,
-    //   'gymId',
+    //   'gym_id',
     //   id,
     //   "GYM_ADDED_TRAINER",
     //   "gym added trainer"
     // )
     // await addActivity(
     //   TrainerActivities,
-    //   'trainerId',
+    //   'trainer_id',
     //   trainer.id,
     //   "TRAINER_CREATED_BY_GYM",
     //   "trainer created by gym"
@@ -55,14 +55,8 @@ const addGymTrainer = async (req, res) => {
   }
 }
 
-const updateGymTrainer = async (data) => {
+exports.updateGymTrainer = async (data) => {
 }
 
-const deleteGymTrainer = async (data) => {
-}
-
-module.exports = {
-  addGymTrainer,
-  updateGymTrainer,
-  deleteGymTrainer,
+exports.deleteGymTrainer = async (data) => {
 }

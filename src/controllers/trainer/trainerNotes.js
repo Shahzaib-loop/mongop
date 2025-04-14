@@ -5,7 +5,7 @@ const { addActivity } = require("../../utils/activities")
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 const trainerNotes = require("../../services/trainer/trainerNotes")
 
-const trainerNoteData = async (req, res) => {
+exports.trainerNoteData = async (req, res) => {
   try {
     // iski zarorat shayad na paray kunke jab workout get hoon gat to join se ye notes sath ain gay hr workout ke
 
@@ -18,22 +18,22 @@ const trainerNoteData = async (req, res) => {
   }
 }
 
-const trainerNoteCreate = async (req, res) => {
+exports.trainerNoteCreate = async (req, res) => {
   try {
     const { id } = req?.params //  workoutId
-    const { trainerId, description } = req?.body // trainerId
+    const { trainer_id, description } = req?.body // trainer_id
 
-    // workout ke against note save hoga or traineeId params se mil rhi hogi as traineeNotes
+    // workout ke against note save hoga or trainee_id params se mil rhi hogi as traineeNotes
   }
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
 }
 
-const trainerNoteUpdate = async (req, res) => {
+exports.trainerNoteUpdate = async (req, res) => {
   try {
     const { id } = req?.params //  noteId
-    const { trainerId, ...rest } = req?.body // trainerId remove krni ha, cant be updated
+    const { trainer_id, ...rest } = req?.body // trainer_id remove krni ha, cant be updated
 
     // noteId ke against note save hoga
   }
@@ -42,7 +42,7 @@ const trainerNoteUpdate = async (req, res) => {
   }
 }
 
-const trainerNoteDelete = async (req, res) => {
+exports.trainerNoteDelete = async (req, res) => {
   try {
     const { id } = req?.params //  noteId
 
@@ -51,11 +51,4 @@ const trainerNoteDelete = async (req, res) => {
   catch (error) {
     responseHandler.error(res, 500, error.message, "")
   }
-}
-
-module.exports = {
-  trainerNoteData,
-  trainerNoteCreate,
-  trainerNoteUpdate,
-  trainerNoteDelete,
 }

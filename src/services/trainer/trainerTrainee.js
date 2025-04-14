@@ -5,10 +5,10 @@ const Trainee = db.sequelize.model('trainees')
 // const TraineeNotes = db.sequelize.model('trainee_notes')
 
 // =======>>> Trainer handling Trainee
-const getTrainerTrainee = async (trainerId) => {
+const getTrainerTrainee = async (trainer_id) => {
   return Trainee.findAll(
     {
-      where: { trainerId, deleted: false, },
+      where: { trainer_id, deleted: false, },
       include: [
         // {
         //   model: TraineeActivities,
