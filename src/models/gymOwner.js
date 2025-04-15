@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
 
-const trainers = sequelize.define("trainers",
+const gym_owners = sequelize.define("gym_owners",
   {
     id: {
       type: DataTypes.UUID,
@@ -9,17 +9,9 @@ const trainers = sequelize.define("trainers",
       allowNull: false,
       primaryKey: true,
     },
-    user_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-    },
     gym_id: {
       type: DataTypes.UUID,
-      allowNull: false,
-    },
-    trainer_type: {
-      type: DataTypes.STRING,
-      defaultValue: "non_default",
+      allowNull: true,
     },
     first_name: {
       type: DataTypes.STRING,
@@ -44,6 +36,9 @@ const trainers = sequelize.define("trainers",
         isNumeric: true,
       },
     },
+    address: {
+      type: DataTypes.STRING,
+    },
     deleted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -62,4 +57,6 @@ const trainers = sequelize.define("trainers",
   }
 )
 
-module.exports = trainers
+module.exports = gym_owners
+
+

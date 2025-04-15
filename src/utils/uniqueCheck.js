@@ -1,14 +1,14 @@
 const { Op } = require("sequelize")
 
 const uniqueCheck = async (model, data = {}, roleType = '',) => {
-  let numValue = data['number']
+  let numValue = data['phone_number']
   let emailValue = data['email']
 
   const record = await model.findOne({
     where: {
       [Op.or]: [
         { email: emailValue },
-        { number: numValue }
+        { phone_number: numValue }
       ],
       deleted: false
     },

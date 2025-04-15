@@ -5,6 +5,7 @@ const GymActivities = require("./gymActivities")
 const TrainerActivities = require("./trainerActivities")
 const TraineeActivities = require("./traineeActivities")
 const Admins = require("./admin")
+const GymOwner = require("./gymOwner")
 const Gym = require("./gym")
 const Trainer = require("./trainer")
 const Trainee = require("./trainee")
@@ -16,18 +17,20 @@ const TrainerNotes = require("./trainerNotes")
 const TraineeNotes = require("./traineeNotes")
 
 //  ==== User ============================================================
-// User.hasOne(Gym, { foreignKey: 'user_id' })
-// Gym.belongsTo(User, { foreignKey: 'user_id' })
+Gym.hasOne(User, { foreignKey: 'linked_id', as: 'gym_user' })
+User.belongsTo(Gym, { foreignKey: 'linked_id' })
 
-User.hasOne(Trainer, { foreignKey: 'user_id' })
-Trainer.belongsTo(User, { foreignKey: 'user_id' })
+Trainer.hasOne(User, { foreignKey: 'linked_id' })
+User.belongsTo(Trainer, { foreignKey: 'linked_id' })
 
-User.hasOne(Trainee, { foreignKey: 'user_id' })
-Trainee.belongsTo(User, { foreignKey: 'user_id' })
+Trainee.hasOne(User, { foreignKey: 'linked_id' })
+User.belongsTo(Trainee, { foreignKey: 'linked_id' })
+
 
 //  ==== Refresh Token ============================================================
 // User.hasOne(RefreshToken, { foreignKey: 'user_id' })
 // RefreshToken.belongsTo(User, { foreignKey: 'user_id' })
+
 
 //  ==== Activities ============================================================
 // Admin.hasMany(Admin_activities, { foreignKey: 'adminId' })
@@ -44,7 +47,10 @@ Trainee.belongsTo(User, { foreignKey: 'user_id' })
 
 //  ==== Admin ============================================================
 
+
 //  ==== Gym ============================================================
+Gym.hasMany(GymOwner, { foreignKey: 'owner_ids', as: 'owners' })
+GymOwner.belongsTo(Gym, { foreignKey: 'gym_id' })
 
 Gym.hasMany(Trainer, { foreignKey: 'gym_id', as: 'trainers' })
 Trainer.belongsTo(Gym, { foreignKey: 'gym_id' })
@@ -55,12 +61,14 @@ Trainee.belongsTo(Gym, { foreignKey: 'gym_id' })
 // Gym.hasMany(TraineeWorkoutPlan, { foreignKey: 'gym_id' })
 // TraineeWorkoutPlan.belongsTo(Gym, { foreignKey: 'gym_id' })
 
+
 //  ==== Trainers ============================================================
 Trainer.hasMany(Trainee, { foreignKey: 'trainer_id', as: 'trainees' })
 Trainee.belongsTo(Trainer, { foreignKey: 'trainer_id', })
 
 // Trainer.hasMany(TraineeWorkoutPlan, { foreignKey: 'trainer_id' })
 // TraineeWorkoutPlan.belongsTo(Trainer, { foreignKey: 'trainer_id' })
+
 
 //  ==== Trainees ============================================================
 // Trainee.hasMany(TraineeWorkoutPlan, { foreignKey: 'trainee_id' });
@@ -73,13 +81,16 @@ Trainee.belongsTo(Trainer, { foreignKey: 'trainer_id', })
 // TraineeWorkoutPlan.hasMany(TraineeWorkoutDay, { foreignKey: 'workout_plan_id' });
 // TraineeWorkoutDay.belongsTo(TraineeWorkoutPlan, { foreignKey: 'workout_plan_id' });
 
+
 //  ==== Workout Day ============================================================
 // TraineeWorkoutDay.hasMany(TraineeWorkoutPlan, { foreignKey: 'workout_day_id' });
 // TraineeWorkoutPlan.belongsTo(TraineeWorkoutDay, { foreignKey: 'workout_day_id' });
 
+
 //  ==== Workout Exercise ============================================================
 // TraineeWorkoutExercise.hasMany(TraineeExerciseProgress, { foreignKey: 'workout_exercise_id' });
 // TraineeExerciseProgress.belongsTo(TraineeWorkoutExercise, { foreignKey: 'workout_exercise_id' });
+
 
 //  ==== Notes ============================================================
 

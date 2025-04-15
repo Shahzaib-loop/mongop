@@ -1,14 +1,14 @@
 const db = require('../../models')
+const bcrypt = require('bcryptjs')
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
 const { uniqueCheck } = require('../../utils/uniqueCheck')
 const { addActivity } = require('../../utils/activities')
 const Trainee = db.sequelize.model('trainees')
+const gym = require('../../services/gym/gym')
+const trainee = require('../../services/trainee/trainee')
 // const GymActivities = db.sequelize.model('gym_activities')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
-const trainee = require('../../services/trainee/trainee')
-const gym = require('../../services/gym/gym')
-const bcrypt = require('bcryptjs');
 
 exports.addGymTrainee = async (req, res) => {
   try {

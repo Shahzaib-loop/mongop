@@ -13,8 +13,8 @@ router.post('/register', gym.gymCreate)
 router.post('/login', gym.gymLogin)
 router.post('/logout', gym.gymLogout)
 
-router.get('/', gym.gymsData)
-router.get('/:id', gym.gymData)
+router.get('/', gym.gymAll)
+router.get('/:id', gym.gymById)
 router.get('/activities/:id', gym.gymActivities)
 
 router.post('/create', gym.gymCreate)

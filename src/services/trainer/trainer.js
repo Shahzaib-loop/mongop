@@ -5,7 +5,7 @@ const Trainer = db.sequelize.model('trainers')
 const Trainee = db.sequelize.model('trainees')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 
-const loginTrainer = async ({ email, password }) => {
+exports.loginTrainer = async ({ email, password }) => {
   const trainer = await Trainer.findOne({ where: { email }, raw: true })
 
   if (!(Object.keys(trainer).length > 0)) return false
@@ -21,19 +21,19 @@ const loginTrainer = async ({ email, password }) => {
   return { trainer, tokens }
 }
 
-const logoutTrainer = async (email) => {
+exports.logoutTrainer = async (email) => {
   return email
 }
 
-const getTrainerActivities = async (id) => {
+exports.getTrainerActivities = async (id) => {
   // return TrainerActivities.findAll({ where: { trainer_id: id }, })
 }
 
-const getAllTrainers = async () => {
+exports.getAllTrainers = async () => {
   return Trainer.findAll({ where: { deleted: false } })
 }
 
-const getTrainerById = async (id) => {
+exports.getTrainerById = async (id) => {
   return Trainer.findOne({
     where: { id, deleted: false, },
     include: [
@@ -48,30 +48,22 @@ const getTrainerById = async (id) => {
   })
 }
 
-const createTrainer = async (data, t) => {
+exports.createTrainer = async (data, t) => {
   return Trainer.create(data, { transaction: t })
 }
 
-const updateTrainer = async (id, data) => {
-  return Trainer.update(data, { where: { id } })
+exports.updateTrainer = async (id, data, t,) => {
+  return Trainer.update(data, { where: { id }, transaction: t })
 }
 
-const deleteTrainer = async () => {
+exports.updateDefaultTrainer = async (gym_id, data, t,) => {
+  return Trainer.update(data, { where: { gym_id }, transaction: t })
+}
+
+exports.deleteTrainer = async (id) => {
   return Trainer.update({ deleted: true }, { where: { id } })
 }
 
-const restoreTrainer = async () => {
+exports.restoreTrainer = async (id) => {
   return Trainer.update({ deleted: false }, { where: { id } })
-}
-
-module.exports = {
-  loginTrainer,
-  logoutTrainer,
-  getTrainerActivities,
-  getAllTrainers,
-  getTrainerById,
-  createTrainer,
-  updateTrainer,
-  deleteTrainer,
-  restoreTrainer,
 }

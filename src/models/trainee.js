@@ -1,7 +1,8 @@
 const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
 
-const trainees = sequelize.define("trainees", {
+const trainees = sequelize.define("trainees",
+  {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -35,7 +36,7 @@ const trainees = sequelize.define("trainees", {
         isEmail: true,
       },
     },
-    number: {
+    phone_number: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,

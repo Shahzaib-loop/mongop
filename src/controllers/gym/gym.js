@@ -2,16 +2,16 @@ const db = require('../../models')
 const bcrypt = require("bcryptjs")
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
-const User = db.sequelize.model('unified_user_data')
+const { addActivity } = require("../../utils/activities")
+const { uniqueCheck } = require("../../utils/uniqueCheck")
+const { generateTokens } = require('../../utils/auth');
 const Gym = db.sequelize.model('gyms')
 // const GymActivities = db.sequelize.model('gym_activities')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
-const { uniqueCheck } = require("../../utils/uniqueCheck")
-const { addActivity } = require("../../utils/activities")
 const user = require("../../services/user/user")
 const gym = require("../../services/gym/gym")
+const gymOwner = require("../../services/gym/gymOwner")
 const trainer = require('../../services/trainer/trainer')
-const { generateTokens } = require('../../utils/auth');
 
 //  when register api hit, it will just add data & send code to email or number
 //  after verification the account will register & user will login with access & refresh tokens
@@ -34,8 +34,8 @@ exports.gymLogin = async (req, res) => {
       )
     }
 
-    const user = await User.findOne({ where: { email } })
-    if (!user) {
+    const userData = await user.findUserByEmail(email)
+    if (!userData) {
       return responseHandler.unauthorized(
         res,
         "Invalid Email or Password",
@@ -43,7 +43,7 @@ exports.gymLogin = async (req, res) => {
       )
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, userData.password)
     if (!isMatch) {
       return responseHandler.unauthorized(
         res,
@@ -52,9 +52,9 @@ exports.gymLogin = async (req, res) => {
       )
     }
 
-    const token = generateTokens(user)
+    const token = generateTokens(userData)
 
-    return responseHandler.success(res, "Gym Login successfully", { token, role: user.role })
+    return responseHandler.success(res, "Gym Login successfully", { token, userData, })
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
@@ -100,7 +100,7 @@ exports.gymActivities = async (req, res) => {
   }
 }
 
-exports.gymsData = async (req, res) => {
+exports.gymAll = async (req, res) => {
   try {
     const data = await gym.getAllGyms()
 
@@ -111,7 +111,7 @@ exports.gymsData = async (req, res) => {
   }
 }
 
-exports.gymData = async (req, res) => {
+exports.gymById = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
@@ -132,21 +132,30 @@ exports.gymCreate = async (req, res) => {
       name = '',
       owner_name = '',
       email = '',
-      number = '',
+      phone_number = '',
       password = '',
       address = '',
       state = '',
       city = '',
       country = '',
       zip_code = '',
+      owners = []
     } = req?.body
 
-    if (!(name && owner_name && email && number && password && address && state && city && country && zip_code)) {
+    if (!(name && owner_name && email && phone_number && password && address && state && city && country && zip_code)) {
       return responseHandler.error(
         res,
         400,
         "Required Fields are Invalid",
         "required fields are empty or invalid"
+      )
+    }
+    if (!(owners?.length > 0 && owners.every(ele => ele?.first_name && ele?.email && ele?.phone_number))) {
+      return responseHandler.error(
+        res,
+        400,
+        "Owner Fields are Invalid",
+        "required fields for owner are empty or invalid"
       )
     }
 
@@ -156,78 +165,72 @@ exports.gymCreate = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let trainerDatum = {
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // =====>>>>>>> gym owner creation
+    const gymOwnerData = await gymOwner.bulkCreateGymOwner(owners, t,)
+
+    const owner_ids = gymOwnerData.map(ele => ele.id)
+
+    // =====>>>>>>> gym creation
+    const gymData = await gym.createGym({ ...req.body, owner_ids }, t,)
+
+    // =====>>>>>>> gym user creation
+    const gymUser = await user.createUser({ linked_id: gymData.id, email, password: hashedPassword, role: 'gym' }, t,)
+
+    // =====>>>>>>> gym update
+    await gym.updateGym(gymData.id, { user_id: gymUser.id }, t)
+
+    // =====>>>>>>> gym owner updated
+    for (let i = 0; i < owner_ids; i++) {
+      await gymOwner.updateGymOwner(owner_ids[i], { gym_id: gymData.id, }, t,)
+    }
+    const trainerDatum = {
+      gym_id: gymData.id,
       role: 'trainer',
       first_name: name,
-      last_name: name,
       email,
-      number,
+      phone_number,
       password,
       trainer_type: 'default',
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // =====>>>>>>> gym creation
-    const gymData = await gym.createGym(req.body, t,)
-
-    const gymUser = await user.createUser({ linked_id: gymData.id, email, password: hashedPassword, role: 'gym' }, t)
-
-    await gym.updateGym(gymData.id, { user_id: gymUser.id }, t)
-
     // =====>>>>>>> default trainer creation
-    const trainerData = await trainer.createTrainer({ ...trainerDatum, gym_id: gymData.id }, t,)
-
-    const trainerUser = await user.createUser(
-      {
-        email,
-        linked_id: trainerData.id,
-        password: hashedPassword,
-        role: 'trainer'
-      },
-      t,
-    )
-
-    await trainer.updateTrainer(trainerData.id, { user_id: trainerUser.id }, t)
+    await trainer.createTrainer(trainerDatum, t,)
 
     // await addActivity(GymActivities, 'gym_id', gym?.id, "GYM_CREATED", "gym registered", t)
-    // await addActivity(TrainerActivities, 'trainer_id', trainer?.id, "DEFAULT_TRAINER_CREATED", "default trainer
-    // created", t)
+    // await addActivity(TrainerActivities, 'trainer_id', trainer?.id, "DEFAULT_TRAINER_CREATED",
+    // "default trainer created", t)
 
     await t.commit()
 
     logger.info("Gym Created")
 
-    responseHandler.created(
+    return responseHandler.created(
       res,
-      "Gym Registered successfully, Default Trainer also Registered",
+      "Gym Registered successfully",
       {
         id: gymData.id,
-        name: gymData.name,
+        phone_number: gymData.phone_number,
         address: gymData.address,
         email: gymUser.email,
         role: gymUser.role,
-        gymTrainer: {
-          id: trainerData.id,
-          name: trainerData.name,
-          address: trainerData.address,
-          email: trainerUser.email,
-          role: trainerUser.role,
-        },
       }
     )
   }
   catch (error) {
     await t.rollback()
     logger.error(`${ error }`)
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
 exports.gymUpdate = async (req, res) => {
+  const t = await db.sequelize.transaction()
+
   try {
     const { id = '' } = req?.params
-    const { number, email, password, ...rest } = req?.body
+    const { phone_number, email, password, owner_id, ...rest } = req?.body
 
     if (!id) {
       return responseHandler.error(
@@ -238,11 +241,120 @@ exports.gymUpdate = async (req, res) => {
       )
     }
 
-    await gym.updateGym(id, rest)
+    await gym.updateGym(id, rest, t)
+
+    let trainerDatum = {
+      first_name: rest.name,
+      last_name: rest.name,
+    }
+
+    await trainer.updateDefaultTrainer(id, trainerDatum, t)
+
+    await t.commit()
 
     // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 
-    responseHandler.success(res, "Gym Updated successfully")
+    return responseHandler.success(res, "Gym Updated successfully")
+  }
+  catch (error) {
+    return responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.gymUpdateOwner = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+    const { owner_id = '', } = req?.body
+
+    if (!(id && owner_id)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid"
+      )
+    }
+
+    await gym.updateGym(id, { owner_id })
+
+    // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
+
+    responseHandler.success(res, "Gym Owner Updated successfully")
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.gymUpdatePhoneNumber = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+    const { phone_number = '', } = req?.body
+
+    if (!(id && phone_number)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid"
+      )
+    }
+
+    await gym.updateGym(id, { phone_number })
+
+    // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
+
+    responseHandler.success(res, "Gym Phone Number Updated successfully")
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.gymUpdateEmail = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+    const { email = '', } = req?.body
+
+    if (!(id && email)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid"
+      )
+    }
+
+    await gym.updateGym(id, { email })
+
+    // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
+
+    responseHandler.success(res, "Gym Email Updated successfully")
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.gymUpdatePassword = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+    const { password = '', } = req?.body
+
+    if (!(id && password)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid"
+      )
+    }
+
+    await gym.updateGym(id, { password })
+
+    // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
+
+    responseHandler.success(res, "Gym Password Updated successfully")
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
@@ -252,6 +364,18 @@ exports.gymUpdate = async (req, res) => {
 exports.gymDelete = async (req, res) => {
   try {
     const { id = '', } = req?.params
+
+    // when gym deleted following will be updated
+    // gyms
+    // gym_owners
+    // gym_activities
+    // trainers (default and other trainers will be deleted)
+    // trainees (trainees will be deleted)
+    // trainer_activities
+    // trainee_activities
+    // trainer_notes
+    // trainee_notes
+    // all will be deleted
 
     if (!id) {
       return responseHandler.error(

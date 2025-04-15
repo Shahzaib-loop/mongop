@@ -2,6 +2,7 @@ const db = require("../../models")
 const { generateTokens } = require('../../utils/auth')
 const User = db.sequelize.model('unified_user_data')
 const Gym = db.sequelize.model('gyms')
+const GymOwner = db.sequelize.model('gym_owners')
 const Trainee = db.sequelize.model('trainees')
 const Trainer = db.sequelize.model('trainers')
 // const GymActivities = db.sequelize.model('gym_activities')
@@ -48,15 +49,15 @@ exports.getAllGyms = async () => {
       // },
       {
         model: Trainee,
-        as: 'gym_trainee'
+        as: 'trainees',
       },
       {
         model: Trainer,
-        as: 'gym_trainer'
+        as: 'trainers',
       },
       {
         model: User,
-        as: 'gym_users'
+        as: 'gym_user',
       },
     ]
   })
@@ -71,18 +72,22 @@ exports.getGymById = async (id) => {
       //   as: 'gymActivities'
       // },
       {
+        model: GymOwner,
+        as: 'owners',
+      },
+      {
         model: Trainer,
         as: 'trainers',
         include: [
           {
             model: Trainee,
-            as: 'trainees'
+            as: 'trainees',
           },
         ]
       },
       {
         model: User,
-        as: 'gym_users'
+        as: 'gym_user',
       },
     ]
   })
@@ -92,8 +97,8 @@ exports.createGym = async (data, t) => {
   return await Gym.create(data, { transaction: t })
 }
 
-exports.updateGym = async (id, data) => {
-  return Gym.update(data, { where: { id } })
+exports.updateGym = async (id, data, t,) => {
+  return Gym.update(data, { where: { id }, transaction: t })
 }
 
 exports.deleteGym = async (id) => {
@@ -102,22 +107,4 @@ exports.deleteGym = async (id) => {
 
 exports.restoreGym = async (id) => {
   return Gym.update({ deleted: false }, { where: { id } })
-}
-
-exports.getGymTrainer = async (gym_id) => {
-  return Trainer.findOne({
-    where: { gym_id },
-    // include: {
-    //   model: TrainerActivities,
-    // }
-  })
-}
-
-exports.getAllGymTrainers = async (gym_id) => {
-  return Trainer.findAll({
-    where: { gym_id },
-    // include: {
-    //   model: TrainerActivities,
-    // }
-  })
 }

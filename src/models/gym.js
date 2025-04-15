@@ -1,7 +1,8 @@
 const { DataTypes } = require("sequelize")
 const { sequelize } = require("../config/db")
 
-const gyms = sequelize.define("gyms", {
+const gyms = sequelize.define("gyms",
+  {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -12,11 +13,11 @@ const gyms = sequelize.define("gyms", {
       type: DataTypes.UUID,
       allowNull: true,
     },
-    name: {
-      type: DataTypes.STRING,
+    owner_ids: {
+      type: DataTypes.ARRAY(DataTypes.UUID),
       allowNull: false,
     },
-    owner_name: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -28,7 +29,7 @@ const gyms = sequelize.define("gyms", {
         isEmail: true,
       },
     },
-    number: {
+    phone_number: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
