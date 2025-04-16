@@ -7,56 +7,88 @@ const Trainer = db.sequelize.model('trainers')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 const { uniqueCheck } = require('../../utils/uniqueCheck')
 const { addActivity } = require('../../utils/activities')
-const trainer  = require('../../services/trainer/trainer')
+const user = require('../../services/user/user')
+const trainer = require('../../services/trainer/trainer')
 
 exports.addGymTrainer = async (req, res) => {
-  try {
-    const { id = '', } = req?.params
-    const { firstName = '', lastName = '', email = '', number = '', } = req?.body
+  const t = await db.sequelize.transaction()
+  const tempPassword = 'Trainer1234'
 
-    if (!(id && firstName && lastName && email && number)) {
+  try {
+    const { id: gym_id = '', } = req?.params
+    const { first_name = '', last_name = '', email = '', phone_number = '', } = req?.body
+
+    if (!(gym_id && first_name && last_name && email && phone_number)) {
+      await t.rollback()
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    let isExisting = await uniqueCheck(Trainer, req.body, "trainer",)
+    let isExisting = await uniqueCheck(Trainer, req.body, "Trainer",)
 
     if (isExisting?.reason) {
+      await t.rollback()
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const tempPassword = 'tester'
-    const hashedPassword = await bcrypt.hash(tempPassword, 10)
+    const trainerData = await trainer.createTrainer({ ...req.body, gym_id, trainerType: 'non_default', }, t,)
 
-    let trainerData = await trainer.createTrainer({ ...req.body, gym_id: id, trainerType: 'non_default', password: hashedPassword })
-
-    if (!(Object.keys(trainer).length > 0)) {
-      responseHandler.error(res, 400, "", "",)
+    if (!trainerData?.id) {
+      await t.rollback()
+      return responseHandler.error(res, 400, "Failed to create trainer record")
     }
+
+    const hashedPassword = await bcrypt.hash(tempPassword, 10)
+    const userData = await user.createUser({
+        linked_id: trainerData.id,
+        email,
+        password: hashedPassword,
+        role: 'trainer',
+      },
+      t,
+    )
+
+    if (!userData?.id) {
+      await t.rollback()
+      return responseHandler.error(res, 400, "Failed to Create Trainer's User")
+    }
+
+    await trainer.updateTrainer(trainerData.id, { user_id: userData.id }, t,)
 
     // await addActivity(
     //   GymActivities,
     //   'gym_id',
-    //   id,
+    //   gym_id,
     //   "GYM_ADDED_TRAINER",
     //   "gym added trainer"
     // )
     // await addActivity(
     //   TrainerActivities,
     //   'trainer_id',
-    //   trainer.id,
+    //   trainerData.id,
     //   "TRAINER_CREATED_BY_GYM",
     //   "trainer created by gym"
     // )
 
-    responseHandler.success(res, "Trainer Created Successfully", trainerData)
+    await t.commit()
+
+    return responseHandler.success(res, "Trainer Created Successfully", trainerData)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    await t.rollback()
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
-exports.updateGymTrainer = async (data) => {
+exports.updateGymTrainer = async (req, res) => {
+  try {
+    const { id = '' } = req.params
+    const { first_name = '', last_name = '', email = '', phone_number = '' } = req.body
+
+  }
+  catch (e) {
+
+  }
 }
 
-exports.deleteGymTrainer = async (data) => {
+exports.deleteGymTrainer = async (req, res) => {
 }

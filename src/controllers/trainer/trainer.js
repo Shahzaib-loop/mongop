@@ -1,10 +1,12 @@
 const db = require('../../models')
+const bcrypt = require('bcryptjs');
 const logger = require("../../utils/logger")
 const responseHandler = require('../../utils/responseHandler')
 const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const Trainer = db.sequelize.model('trainers')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
+const user = require('../../services/user/user');
 const trainer = require("../../services/trainer/trainer")
 
 exports.trainerLogin = async (req, res) => {
@@ -12,13 +14,21 @@ exports.trainerLogin = async (req, res) => {
     const { email = '', password = '' } = req?.body
 
     if (!(email && password)) {
-      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+      return responseHandler.unauthorized(
+        res,
+        "Email or Password is Incorrect",
+        "email or password is incorrect or no data found",
+      )
     }
 
     const resp = await trainer.loginTrainer({ email, password })
 
     if (!(Object.keys(resp).length > 0)) {
-      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+      return responseHandler.unauthorized(
+        res,
+        "Email or Password is Incorrect",
+        "email or password is incorrect or no data found",
+      )
     }
 
     responseHandler.success(res, "Gym Login successfully", resp)
@@ -44,7 +54,12 @@ exports.trainerActivities = async (req, res) => {
     const { id = '' } = req?.params
 
     if (!id) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
     }
 
     const data = await trainer.getTrainerActivities(id)
@@ -72,7 +87,12 @@ exports.trainerData = async (req, res) => {
     const { id = '' } = req?.params
 
     if (!id) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
     }
 
     const data = await trainer.getTrainerById(id)
@@ -85,54 +105,202 @@ exports.trainerData = async (req, res) => {
 }
 
 exports.trainerCreate = async (req, res) => {
-  try {
-    const tempPassword = 'tester'
-    const {
-      gym_id = '',
-      firstName = '',
-      lastName = '',
-      email = '',
-      number = '',
-      password = '',
-    } = req?.body
+  const t = await db.sequelize.transaction()
+  const tempPassword = 'Trainer1234'
 
-    if (!(firstName && lastName && email && number && password)) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "required fields are empty or invalid")
+  try {
+    const { id: gym_id = '', } = req?.params
+    const { first_name = '', last_name = '', email = '', phone_number = '', } = req?.body
+
+    if (!(gym_id && first_name && last_name && email && phone_number)) {
+      await t.rollback()
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    let isExisting = await uniqueCheck(Trainer, req.body, "Trainee",)
+    let isExisting = await uniqueCheck(Trainer, req.body, "Trainer",)
 
     if (isExisting?.reason) {
+      await t.rollback()
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let trainerData = await trainer.createTrainer({ ...req.body, password: password ? password : tempPassword })
-    trainerData = await trainerData.toJSON()
+    const trainerData = await trainer.createTrainer({ ...req.body, gym_id, trainerType: 'non_default', }, t,)
 
-    // await addActivity(TrainerActivities, trainer?.id, "TRAINER_CREATED", "trainer registered")
+    if (!trainerData?.id) {
+      await t.rollback()
+      return responseHandler.error(res, 400, "Failed to create trainer record")
+    }
 
-    responseHandler.created(res, "Trainer registered successfully", trainerData)
+    const hashedPassword = await bcrypt.hash(tempPassword, 10)
+    const userData = await user.createUser({
+        linked_id: trainerData.id,
+        email,
+        password: hashedPassword,
+        role: 'trainer',
+      },
+      t,
+    )
+
+    if (!userData?.id) {
+      await t.rollback()
+      return responseHandler.error(res, 400, "Failed to Create Trainer's User")
+    }
+
+    await trainer.updateTrainer(trainerData.id, { user_id: userData.id }, t,)
+
+    // await addActivity(
+    //   GymActivities,
+    //   'gym_id',
+    //   gym_id,
+    //   "GYM_ADDED_TRAINER",
+    //   "gym added trainer"
+    // )
+    // await addActivity(
+    //   TrainerActivities,
+    //   'trainer_id',
+    //   trainerData.id,
+    //   "TRAINER_CREATED_BY_GYM",
+    //   "trainer created by gym"
+    // )
+
+    await t.commit()
+
+    return responseHandler.success(res, "Trainer Created Successfully", trainerData)
   }
   catch (error) {
-    logger.error(`${ error }`)
-    responseHandler.error(res, 500, "", error.message,)
+    await t.rollback()
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
 exports.trainerUpdate = async (req, res) => {
   try {
-    const { id = '' } = req?.params
-    const { number, email, password, ...rest } = req?.body
+    const { id: trainer_id = '' } = req?.params
+    const { gym_id, user_id, email, phone_number, trainer_type, ...rest } = req?.body
 
-    if (!id) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
+    if (!trainer_id) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
     }
 
-    await trainer.updateTrainer(id, rest)
+    await trainer.updateTrainer(trainer_id, rest)
 
     // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
 
-    responseHandler.success(res, "Trainer Updated successfully")
+    return responseHandler.success(res, "Trainer Updated successfully")
+  }
+  catch (error) {
+    return responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.trainerUpdatePhone = async (req, res) => {
+  try {
+    const { id: trainer_id = '' } = req?.params
+    const { gym_id = '', phone_number = '', } = req?.body
+
+    if (!(trainer_id && gym_id && phone_number)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
+    }
+
+    await trainer.updateTrainerByGymId(trainer_id, gym_id, { phone_number },)
+
+    // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
+
+    return responseHandler.success(res, "Trainer Phone Number Updated successfully")
+  }
+  catch (error) {
+    return responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.trainerUpdateEmail = async (req, res) => {
+  const t = await db.sequelize.transaction()
+
+  try {
+    const { id: trainer_id = '' } = req?.params
+    const { gym_id = '', email = '', } = req?.body
+
+    if (!(trainer_id && gym_id && email)) {
+      await t.rollback()
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
+    const trainerUpdateData = await trainer.updateTrainerByGymId(trainer_id, gym_id, { email }, t)
+
+    if (!trainerUpdateData[0]) {
+      await t.rollback()
+
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
+    let userData = await user.findUserByLinkedId(trainer_id)
+
+    const userUpdateData = await user.updateUser(userData.id, { email }, t)
+
+    if (!userUpdateData[0]) {
+      await t.rollback()
+
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
+    // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
+
+    await t.commit()
+
+    return responseHandler.success(res, "Trainer Email Updated successfully")
+  }
+  catch (error) {
+    await t.rollback()
+    return responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.trainerUpdatePassword = async (req, res) => {
+  try {
+    const { id: trainer_id = '' } = req?.params
+    const { password = '', } = req?.body
+
+    if (!(trainer_id && password)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await user.updateUserPassword(trainer_id, hashedPassword)
+
+    // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
+
+    responseHandler.success(res, "Trainer Password Updated successfully")
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
@@ -144,7 +312,12 @@ exports.trainerDelete = async (req, res) => {
     const { id = '', } = req?.params
 
     if (!id) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
     }
 
     await trainer.deleteTrainer(id)
@@ -163,7 +336,12 @@ exports.trainerRestore = async (req, res) => {
     const { id = '', } = req?.params
 
     if (!id) {
-      return responseHandler.error(res, 400, "Required Fields are Invalid", "Id is empty or invalid")
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
     }
 
     await trainer.restoreTrainer(id)

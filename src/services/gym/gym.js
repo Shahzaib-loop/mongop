@@ -1,6 +1,6 @@
 const db = require("../../models")
 const { generateTokens } = require('../../utils/auth')
-const User = db.sequelize.model('unified_user_data')
+const User = db.sequelize.model('unified_users')
 const Gym = db.sequelize.model('gyms')
 const GymOwner = db.sequelize.model('gym_owners')
 const Trainee = db.sequelize.model('trainees')
@@ -94,7 +94,7 @@ exports.getGymById = async (id) => {
 }
 
 exports.createGym = async (data, t) => {
-  return await Gym.create(data, { transaction: t })
+  return Gym.create(data, { transaction: t })
 }
 
 exports.updateGym = async (id, data, t,) => {

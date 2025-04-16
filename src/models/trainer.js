@@ -9,13 +9,13 @@ const trainers = sequelize.define("trainers",
       allowNull: false,
       primaryKey: true,
     },
-    user_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-    },
     gym_id: {
       type: DataTypes.UUID,
       allowNull: false,
+    },
+    user_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
     },
     trainer_type: {
       type: DataTypes.STRING,

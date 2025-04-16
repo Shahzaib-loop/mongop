@@ -53,7 +53,11 @@ exports.createTrainer = async (data, t) => {
 }
 
 exports.updateTrainer = async (id, data, t,) => {
-  return Trainer.update(data, { where: { id }, transaction: t })
+  return Trainer.update(data, { where: { id, }, transaction: t })
+}
+
+exports.updateTrainerByGymId = async (id, gym_id, data, t,) => {
+  return Trainer.update(data, { where: { id, gym_id, }, transaction: t })
 }
 
 exports.updateDefaultTrainer = async (gym_id, data, t,) => {

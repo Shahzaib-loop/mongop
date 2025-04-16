@@ -1,28 +1,35 @@
 const { sequelize } = require("../config/db")
 const { DataTypes } = require("sequelize")
 
-const unified_user_data = sequelize.define("unified_user_data", {
+const unified_users = sequelize.define("unified_users", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       primaryKey: true,
     },
-    linked_id: {           //points to the real table like gym_id, trainer_id, etc.
+    linked_id: {
       type: DataTypes.UUID,
       allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true
+      }
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    role: {                //  role ENUM('admin', 'gym', 'trainer', 'trainee')
+    role: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        isIn: [['admin', 'gym', 'trainer', 'trainee']]
+      },
     },
     deleted: {
       type: DataTypes.BOOLEAN,
@@ -42,4 +49,22 @@ const unified_user_data = sequelize.define("unified_user_data", {
   }
 )
 
-module.exports = unified_user_data
+module.exports = unified_users
+
+//  to check constrains
+//
+// SELECT
+//   conname,
+//   conrelid::regclass AS table_from,
+//   a.attname AS column_from,
+//   confrelid::regclass AS table_to
+// FROM
+//   pg_constraint
+//   JOIN pg_class ON conrelid = pg_class.oid
+//   JOIN pg_attribute a ON a.attrelid = conrelid AND a.attnum = ANY(conkey)
+// WHERE
+//   conrelid = 'unified_users'::regclass;
+
+//  to alter constrains
+//
+// ALTER TABLE unified_users DROP CONSTRAINT unified_users_linked_id_fkey;

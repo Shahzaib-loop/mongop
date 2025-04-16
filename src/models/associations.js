@@ -1,4 +1,4 @@
-const User = require("./unifiedUserData")
+const User = require("./unifiedUsers")
 const RefreshToken = require("./refreshTokens")
 const AdminActivities = require("./adminActivities")
 const GymActivities = require("./gymActivities")
@@ -17,14 +17,14 @@ const TrainerNotes = require("./trainerNotes")
 const TraineeNotes = require("./traineeNotes")
 
 //  ==== User ============================================================
-Gym.hasOne(User, { foreignKey: 'linked_id', as: 'gym_user' })
-User.belongsTo(Gym, { foreignKey: 'linked_id' })
+Gym.hasOne(User, { foreignKey: 'linked_id', as: 'gym_user', constraints: false, })
+User.belongsTo(Gym, { foreignKey: 'linked_id', constraints: false, })
 
-Trainer.hasOne(User, { foreignKey: 'linked_id' })
-User.belongsTo(Trainer, { foreignKey: 'linked_id' })
+Trainer.hasOne(User, { foreignKey: 'linked_id', constraints: false, })
+User.belongsTo(Trainer, { foreignKey: 'linked_id', constraints: false, })
 
-Trainee.hasOne(User, { foreignKey: 'linked_id' })
-User.belongsTo(Trainee, { foreignKey: 'linked_id' })
+Trainee.hasOne(User, { foreignKey: 'linked_id', constraints: false, })
+User.belongsTo(Trainee, { foreignKey: 'linked_id', constraints: false, })
 
 
 //  ==== Refresh Token ============================================================

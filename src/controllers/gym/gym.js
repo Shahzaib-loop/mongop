@@ -35,6 +35,7 @@ exports.gymLogin = async (req, res) => {
     }
 
     const userData = await user.findUserByEmail(email)
+
     if (!userData) {
       return responseHandler.unauthorized(
         res,
@@ -130,7 +131,6 @@ exports.gymCreate = async (req, res) => {
   try {
     const {
       name = '',
-      owner_name = '',
       email = '',
       phone_number = '',
       password = '',
@@ -142,7 +142,7 @@ exports.gymCreate = async (req, res) => {
       owners = []
     } = req?.body
 
-    if (!(name && owner_name && email && phone_number && password && address && state && city && country && zip_code)) {
+    if (!(name && email && phone_number && password && address && state && city && country && zip_code)) {
       return responseHandler.error(
         res,
         400,
@@ -150,6 +150,7 @@ exports.gymCreate = async (req, res) => {
         "required fields are empty or invalid"
       )
     }
+
     if (!(owners?.length > 0 && owners.every(ele => ele?.first_name && ele?.email && ele?.phone_number))) {
       return responseHandler.error(
         res,
@@ -229,10 +230,10 @@ exports.gymUpdate = async (req, res) => {
   const t = await db.sequelize.transaction()
 
   try {
-    const { id = '' } = req?.params
-    const { phone_number, email, password, owner_id, ...rest } = req?.body
+    const { id: gym_id = '' } = req?.params
+    const { owner_ids, phone_number, email, ...rest } = req?.body
 
-    if (!id) {
+    if (!gym_id) {
       return responseHandler.error(
         res,
         400,
@@ -241,14 +242,14 @@ exports.gymUpdate = async (req, res) => {
       )
     }
 
-    await gym.updateGym(id, rest, t)
+    await gym.updateGym(gym_id, rest, t)
 
     let trainerDatum = {
       first_name: rest.name,
       last_name: rest.name,
     }
 
-    await trainer.updateDefaultTrainer(id, trainerDatum, t)
+    await trainer.updateDefaultTrainer(gym_id, trainerDatum, t)
 
     await t.commit()
 
@@ -263,35 +264,35 @@ exports.gymUpdate = async (req, res) => {
 
 exports.gymUpdateOwner = async (req, res) => {
   try {
-    const { id = '' } = req?.params
-    const { owner_id = '', } = req?.body
+    const { id: owner_id = '' } = req?.params
+    const { owner = {} } = req?.body
 
-    if (!(id && owner_id)) {
+    if (!owner_id) {
       return responseHandler.error(
         res,
         400,
         "Required Fields are Invalid",
-        "required fields are empty or invalid"
+        "owner fields are empty or invalid"
       )
     }
 
-    await gym.updateGym(id, { owner_id })
+    await gymOwner.updateGymOwner(owner_id, owner)
 
     // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 
-    responseHandler.success(res, "Gym Owner Updated successfully")
+    return responseHandler.success(res, "Gym Owner Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
 exports.gymUpdatePhoneNumber = async (req, res) => {
   try {
-    const { id = '' } = req?.params
+    const { id: gym_id = '' } = req?.params
     const { phone_number = '', } = req?.body
 
-    if (!(id && phone_number)) {
+    if (!(gym_id && phone_number)) {
       return responseHandler.error(
         res,
         400,
@@ -300,48 +301,79 @@ exports.gymUpdatePhoneNumber = async (req, res) => {
       )
     }
 
-    await gym.updateGym(id, { phone_number })
+    await gym.updateGym(gym_id, { phone_number })
 
     // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 
-    responseHandler.success(res, "Gym Phone Number Updated successfully")
+    return responseHandler.success(res, "Gym Phone Number Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
 exports.gymUpdateEmail = async (req, res) => {
+  const t = await db.sequelize.transaction()
+
   try {
-    const { id = '' } = req?.params
+    const { id: gym_id = '' } = req?.params
     const { email = '', } = req?.body
 
-    if (!(id && email)) {
+    if (!(gym_id && email)) {
+      await t.rollback()
       return responseHandler.error(
         res,
         400,
         "Required Fields are Invalid",
-        "required fields are empty or invalid"
+        "required fields are empty or invalid",
       )
     }
 
-    await gym.updateGym(id, { email })
+    const gymUpdateData = await gym.updateGym(gym_id, { email }, t,)
 
+    if (!gymUpdateData[0]) {
+      await t.rollback()
+
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
+    const gymUser = await user.findUserByLinkedId(gym_id)
+
+    const userUpdateData = await user.updateUser(gymUser.id, { email }, t,)
+
+    if (!userUpdateData[0]) {
+      await t.rollback()
+
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
     // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 
-    responseHandler.success(res, "Gym Email Updated successfully")
+    await t.commit()
+
+    return responseHandler.success(res, "Gym Email Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    await t.rollback()
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
 exports.gymUpdatePassword = async (req, res) => {
   try {
-    const { id = '' } = req?.params
+    const { id: gym_id = '' } = req?.params
     const { password = '', } = req?.body
 
-    if (!(id && password)) {
+    if (!(gym_id && password)) {
       return responseHandler.error(
         res,
         400,
@@ -350,14 +382,16 @@ exports.gymUpdatePassword = async (req, res) => {
       )
     }
 
-    await gym.updateGym(id, { password })
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await user.updateUserPassword(gym_id, hashedPassword)
 
     // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 
-    responseHandler.success(res, "Gym Password Updated successfully")
+    return responseHandler.success(res, "Gym Password Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
