@@ -71,7 +71,7 @@ exports.trainerActivities = async (req, res) => {
   }
 }
 
-exports.trainersData = async (req, res) => {
+exports.trainerAll = async (req, res) => {
   try {
     const data = await trainer.getAllTrainers()
 
@@ -82,7 +82,7 @@ exports.trainersData = async (req, res) => {
   }
 }
 
-exports.trainerData = async (req, res) => {
+exports.trainerById = async (req, res) => {
   try {
     const { id = '' } = req?.params
 
@@ -109,8 +109,13 @@ exports.trainerCreate = async (req, res) => {
   const tempPassword = 'Trainer1234'
 
   try {
-    const { id: gym_id = '', } = req?.params
-    const { first_name = '', last_name = '', email = '', phone_number = '', } = req?.body
+    const {
+      gym_id = '',
+      first_name = '',
+      last_name = '',
+      email = '',
+      phone_number = '',
+    } = req?.body
 
     if (!(gym_id && first_name && last_name && email && phone_number)) {
       await t.rollback()
@@ -124,9 +129,9 @@ exports.trainerCreate = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const trainerData = await trainer.createTrainer({ ...req.body, gym_id, trainerType: 'non_default', }, t,)
+    const trainerData = await trainer.createTrainer({ ...req.body, trainerType: 'non_default', }, t,)
 
-    if (!trainerData?.id) {
+    if (!(trainerData?.id && trainerData?.gym_id)) {
       await t.rollback()
       return responseHandler.error(res, 400, "Failed to create trainer record")
     }
@@ -200,8 +205,15 @@ exports.trainerUpdate = async (req, res) => {
 
 exports.trainerUpdatePhone = async (req, res) => {
   try {
-    const { id: trainer_id = '' } = req?.params
-    const { gym_id = '', phone_number = '', } = req?.body
+    const { id: trainer_id = '', } = req?.params
+    const { gym_id: gymId = '', phone_number = '', } = req?.body
+    let trainerData = {}
+    let gym_id = gymId
+
+    if (!gymId) {
+      trainerData = await trainer.getTrainerById(trainer_id)
+      gym_id = trainerData.gym_id
+    }
 
     if (!(trainer_id && gym_id && phone_number)) {
       return responseHandler.error(
@@ -228,7 +240,14 @@ exports.trainerUpdateEmail = async (req, res) => {
 
   try {
     const { id: trainer_id = '' } = req?.params
-    const { gym_id = '', email = '', } = req?.body
+    const { gym_id: gymId = '', email = '', } = req?.body
+    let trainerData = {}
+    let gym_id = gymId
+
+    if (!gymId) {
+      trainerData = await trainer.getTrainerById(trainer_id)
+      gym_id = trainerData.gym_id
+    }
 
     if (!(trainer_id && gym_id && email)) {
       await t.rollback()
@@ -283,9 +302,16 @@ exports.trainerUpdateEmail = async (req, res) => {
 exports.trainerUpdatePassword = async (req, res) => {
   try {
     const { id: trainer_id = '' } = req?.params
-    const { password = '', } = req?.body
+    const { gym_id: gymId = '', password = '', } = req?.body
+    let trainerData = {}
+    let gym_id = gymId
 
-    if (!(trainer_id && password)) {
+    if (!gymId) {
+      trainerData = await trainer.getTrainerById(trainer_id)
+      gym_id = trainerData.gym_id
+    }
+
+    if (!(trainer_id && gym_id && password)) {
       return responseHandler.error(
         res,
         400,

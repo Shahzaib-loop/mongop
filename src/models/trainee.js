@@ -11,7 +11,7 @@ const trainees = sequelize.define("trainees",
     },
     user_id: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
     },
     gym_id: {
       type: DataTypes.UUID,

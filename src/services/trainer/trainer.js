@@ -33,6 +33,10 @@ exports.getAllTrainers = async () => {
   return Trainer.findAll({ where: { deleted: false } })
 }
 
+exports.getAllTrainerByGymId = async (gym_id) => {
+  return Trainer.findAll({ where: { gym_id, deleted: false } })
+}
+
 exports.getTrainerById = async (id) => {
   return Trainer.findOne({
     where: { id, deleted: false, },

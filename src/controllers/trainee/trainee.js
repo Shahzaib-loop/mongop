@@ -7,7 +7,7 @@ const { addActivity } = require("../../utils/activities")
 const Trainee = db.sequelize.model('trainees')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
 const trainee = require("../../services/trainee/trainee")
-const trainer = require('../../services/trainer/trainer')
+const user = require('../../services/user/user');
 
 exports.traineeLogin = async (req, res) => {
   try {
@@ -47,76 +47,98 @@ exports.traineeActivities = async (req, res) => {
 
     const data = await trainee.trainee.getTraineeActivities(id)
 
-    responseHandler.success(res, "Trainee Data Fetched successfully", data)
+    return responseHandler.success(res, "Trainee Data Fetched successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
-exports.traineesData = async (req, res) => {
+exports.traineeAllByTrainerId = async (req, res) => {
   try {
-    const data = await trainee.trainee.getAllTrainees()
+    const { trainer_id = '' } = req.body
 
-    responseHandler.success(res, "Trainees Fetched successfully", data)
-  }
-  catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
-  }
-}
-
-exports.traineeData = async (req, res) => {
-  try {
-    const { id = '' } = req?.params
-
-    const data = await trainee.getTraineeById(id)
-
-    responseHandler.success(res, "Trainee Data Fetched successfully", data)
-  }
-  catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
-  }
-}
-
-exports.traineeCreate = async (req, res) =>  {
-  try {
-    const {
-      trainer_id = '',
-      firstName = '',
-      lastName = '',
-      email = '',
-      number = '',
-    } = req?.body
-
-    if (!(trainer_id && firstName && lastName && email && number)) {
+    if (!trainer_id) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
-    let isExisting = await uniqueCheck(Trainee, req.body, "trainee",)
+    const data = await trainee.getAllTraineeByTrainerId(trainer_id)
+
+    return responseHandler.success(res, "Trainees Fetched successfully", data)
+  }
+  catch (error) {
+    return responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.traineeById = async (req, res) => {
+  try {
+    const { id: trainee_id = '' } = req?.params
+
+    if (!trainee_id) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    const data = await trainee.getTraineeById(trainee_id)
+
+    return responseHandler.success(res, "Trainee Data Fetched successfully", data)
+  }
+  catch (error) {
+    return responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.traineeCreate = async (req, res) => {
+  const t = await db.sequelize.transaction()
+  const tempPassword = 'Trainee1234'
+
+  try {
+    const {
+      gym_id = '',
+      trainer_id = '',
+      first_name = '',
+      age = '',
+      email = '',
+      phone_number = '',
+    } = req?.body
+
+    if (!(gym_id && trainer_id && first_name && age && email && phone_number)) {
+      await t.rollback()
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    let isExisting = await uniqueCheck(Trainee, req.body, "Trainee",)
 
     if (isExisting?.reason) {
+      await t.rollback()
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const tempPassword = 'tester'
+    let traineeData = await trainee.createTrainee({ ...req.body, }, t,)
+
+    if (!(traineeData?.id && traineeData?.gym_id && traineeData?.trainer_id)) {
+      await t.rollback()
+      return responseHandler.error(res, 400, "Failed to create trainer record")
+    }
+
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
+    const userData = await user.createUser({
+        linked_id: traineeData.id,
+        email,
+        password: hashedPassword,
+        role: 'trainee',
+      },
+      t,
+    )
 
-    const trainerData = await trainer.getTrainer(trainer_id)
-
-    if (!(trainerData?.id && trainerData?.gym_id)) {
-      return responseHandler.error(res, 500, 'Server Error', 'internal server error')
+    if (!userData?.id) {
+      await t.rollback()
+      return responseHandler.error(res, 400, "Failed to Create Trainee's User")
     }
 
-    let trainee = await trainee.createTrainee({
-      ...req.body,
-      trainer_id,
-      gym_id: trainerData.gym_id,
-      password: hashedPassword
-    })
+    console.log(userData, "ddddddddddd")
 
-    if (!(Object.keys(trainee).length > 0)) {
-      responseHandler.error(res, 400, "", "",)
-    }
+    await trainee.updateTrainee(traineeData.id, { user_id: userData.id }, t,)
 
     // await addActivity(
     //   TrainerActivities,
@@ -133,14 +155,64 @@ exports.traineeCreate = async (req, res) =>  {
     //   "trainee created by trainer"
     // )
 
-    responseHandler.success(res, "Trainee Created Successfully", trainee)
+    await t.commit()
+
+    return responseHandler.success(res, "Trainee Created Successfully", traineeData)
+  }
+  catch (error) {
+    return responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.traineeUpdate = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+    const { number, email, password, ...rest } = req?.body
+
+    await trainee.updateTrainee(id, rest)
+
+    // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
+
+    responseHandler.success(res, "Trainee Updated successfully")
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
   }
 }
 
-exports.traineeUpdate = async (req, res) => {
+exports.traineeUpdatePhone = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+    const { number, email, password, ...rest } = req?.body
+
+    await trainee.updateTrainee(id, rest)
+
+    // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
+
+    responseHandler.success(res, "Trainee Updated successfully")
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.traineeUpdateEmail = async (req, res) => {
+  try {
+    const { id = '' } = req?.params
+    const { number, email, password, ...rest } = req?.body
+
+    await trainee.updateTrainee(id, rest)
+
+    // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
+
+    responseHandler.success(res, "Trainee Updated successfully")
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.traineeUpdatePassword = async (req, res) => {
   try {
     const { id = '' } = req?.params
     const { number, email, password, ...rest } = req?.body

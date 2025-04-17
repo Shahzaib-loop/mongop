@@ -20,10 +20,10 @@ exports.trainerTraineeData = async (req, res) => {
 
     let traineesData = await trainerTrainee.getTrainerTrainee(trainer_id)
 
-    responseHandler.success(res, "Trainees Fetched Successfully", traineesData)
+    return responseHandler.success(res, "Trainees Fetched Successfully", traineesData)
   }
   catch (error) {
-    responseHandler.error(res, 500, error.message, "")
+    return responseHandler.error(res, 500, error.message, "")
   }
 }
 
@@ -32,7 +32,7 @@ exports.trainerTraineeUpdate = async (req, res) => {
     const { id = '' } = req?.params
     const { trainer_id, email, number, ...rest } = req?.body
 
-    if (!(id && trainer_id && rest?.firstName?.length > 0 && rest?.lastName?.length > 0)) {
+    if (!(id && trainer_id && rest?.first_name?.length > 0 && rest?.last_name?.length > 0)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
@@ -59,10 +59,10 @@ exports.trainerTraineeUpdate = async (req, res) => {
     //   'trainee updated by trainer'
     // )
 
-    responseHandler.success(res, "Trainee Updated Successfully")
+    return responseHandler.success(res, "Trainee Updated Successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, error.message, "")
+    return responseHandler.error(res, 500, error.message, "")
   }
 }
 
@@ -76,7 +76,7 @@ exports.trainerTraineeUpdatePassword = async (req, res) => {
     }
   }
   catch (error) {
-    responseHandler.error(res, 500, error.message, "")
+    return responseHandler.error(res, 500, error.message, "")
   }
 }
 
@@ -90,6 +90,6 @@ exports.trainerTraineeUpdateEmail = async (req, res) => {
     }
   }
   catch (error) {
-    responseHandler.error(res, 500, error.message, "")
+    return responseHandler.error(res, 500, error.message, "")
   }
 }

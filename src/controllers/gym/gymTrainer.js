@@ -10,6 +10,34 @@ const { addActivity } = require('../../utils/activities')
 const user = require('../../services/user/user')
 const trainer = require('../../services/trainer/trainer')
 
+exports.trainerAll = async (req, res) => {
+  try {
+    const data = await trainer.getAllTrainers()
+
+    responseHandler.success(res, "Trainees Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.trainerAllByGymId = async (req, res) => {
+  try {
+    const { gym_id = '', } = req.body
+
+    if (!gym_id) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    const data = await trainer.getAllTrainerByGymId(gym_id)
+
+    responseHandler.success(res, "Trainees Fetched successfully", data)
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
 exports.addGymTrainer = async (req, res) => {
   const t = await db.sequelize.transaction()
   const tempPassword = 'Trainer1234'

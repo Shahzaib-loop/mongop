@@ -38,7 +38,7 @@ exports.addGymTrainee = async (req, res) => {
 
     console.log(trainerData, "rrrrrrrrrr trainerDatatrainerDatatrainerData")
 
-    const tempPassword = 'tester'
+    const tempPassword = 'Trainee1234'
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
     let trainee = await trainee.createTrainee({ ...req.body, gym_id: id, trainer_id: trainerData.id, password: hashedPassword })

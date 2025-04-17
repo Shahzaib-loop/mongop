@@ -11,11 +11,12 @@ router.get('/listen', (req, res, next) => {
   res.json({ title: 'I am Trainer', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
+// router.post('/register', trainer.trainerCreate)
 router.post('/login', trainer.trainerLogin)
 router.post('/logout', trainer.trainerLogout)
 
-router.get('/', trainer.trainersData)
-router.get('/:id', trainer.trainerData)
+router.get('/', trainer.trainerAll)
+router.get('/:id', trainer.trainerById)
 router.get('/activities/:id', trainer.trainerActivities)
 
 // create Trainer wala decide krna ha ke siraf gym bna sakta
@@ -23,7 +24,7 @@ router.get('/activities/:id', trainer.trainerActivities)
 // agr alag register ho sakta ha to FE pr check hoga role ka
 // ni to gym create hoga jo iska
 
-router.post('/create', trainer.trainerCreate)
+// router.post('/create', trainer.trainerCreate)
 router.post('/update/:id', trainer.trainerUpdate)
 router.post('/updatePhone/:id', trainer.trainerUpdatePhone)
 router.post('/updateEmail/:id', trainer.trainerUpdateEmail)

@@ -1,11 +1,10 @@
 const db = require("../../models")
 const bcrypt = require("bcryptjs")
 const { generateTokens } = require('../../utils/auth')
-const { where } = require('sequelize');
 const Trainee = db.sequelize.model('trainees')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
 
-const loginTrainee = async ({ email, password }) => {
+exports.loginTrainee = async ({ email, password }) => {
   const trainee = await Trainee.findOne({ where: { email }, raw: true })
 
   if (!(Object.keys(trainee).length > 0)) return false
@@ -21,51 +20,38 @@ const loginTrainee = async ({ email, password }) => {
   return { trainee, tokens }
 }
 
-const logoutTrainee = async (email) => {
+exports.logoutTrainee = async (email) => {
   return email
 }
 
-const getTraineeActivities = async (id) => {
+exports.getTraineeActivities = async (id) => {
   // return TraineeActivities.findAll({ where: { trainee_id: id }, })
 }
 
-const getAllTrainees = async (trainer_id) => {
+exports.getAllTrainees = async () => {
+  return Trainee.findAll()
+}
+
+exports.getAllTraineeByTrainerId = async (trainer_id) => {
   return Trainee.findAll({ where: { trainer_id } })
 }
 
-const getTraineeById = async (id) => {
-  return Trainee.findOne({
-    where: { id },
-    // include: {
-    //   model: TraineeActivities,
-    // }
-  })
+exports.getTraineeById = async (id) => {
+  return Trainee.findOne({ where: { id }, })
 }
 
-const createTrainee = async (data, t) => {
+exports.createTrainee = async (data, t) => {
   return Trainee.create(data, { transaction: t })
 }
 
-const updateTrainee = async (id, data) => {
+exports.updateTrainee = async (id, data) => {
   return Trainee.update(data, { where: { id } })
 }
 
-const deleteTrainee = async (id) => {
+exports.deleteTrainee = async (id) => {
   return Trainee.update({ deleted: true }, { where: { id } })
 }
 
-const restoreTrainee = async (id) => {
+exports.restoreTrainee = async (id) => {
   return Trainee.update({ deleted: false }, { where: { id } })
-}
-
-module.exports = {
-  loginTrainee,
-  logoutTrainee,
-  getTraineeActivities,
-  getAllTrainees,
-  getTraineeById,
-  createTrainee,
-  updateTrainee,
-  deleteTrainee,
-  restoreTrainee,
 }
