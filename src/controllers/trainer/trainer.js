@@ -8,6 +8,8 @@ const Trainer = db.sequelize.model('trainers')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 const user = require('../../services/user/user');
 const trainer = require("../../services/trainer/trainer")
+const { generateTokens } = require('../../utils/auth');
+const trainee = require('../../services/trainee/trainee');
 
 exports.trainerLogin = async (req, res) => {
   try {
@@ -16,25 +18,55 @@ exports.trainerLogin = async (req, res) => {
     if (!(email && password)) {
       return responseHandler.unauthorized(
         res,
-        "Email or Password is Incorrect",
-        "email or password is incorrect or no data found",
+        "Unauthorized",
+        "email or password not found",
       )
     }
 
-    const resp = await trainer.loginTrainer({ email, password })
+    const userData = await user.findUserByEmail(email)
 
-    if (!(Object.keys(resp).length > 0)) {
+    if (!(Object.keys(userData).length > 0)) {
       return responseHandler.unauthorized(
         res,
-        "Email or Password is Incorrect",
-        "email or password is incorrect or no data found",
+        "Unauthorized",
+        "email or password not found",
       )
     }
 
-    responseHandler.success(res, "Gym Login successfully", resp)
+    const isMatch = await bcrypt.compare(password, userData.password)
+
+    if (!isMatch) {
+      return responseHandler.unauthorized(
+        res,
+        "Unauthorized",
+        "email or password not found",
+      )
+    }
+
+    const trainerData = await trainer.getTrainerById(userData?.linked_id)
+
+    // console.log(userData.id, "1userDatauserDatauserData")
+    // console.log(userData.linked_id, "2userDatauserDatauserData")
+    console.log(trainerData, "3userDatauserDatauserData")
+
+    if (!trainerData.id) {
+      return responseHandler.unauthorized(
+        res,
+        "Unauthorized",
+        "email or password not found",
+      )
+    }
+
+    const tokens = generateTokens({ id: trainerData?.id, role: userData?.role })
+
+    return responseHandler.success(
+      res,
+      "Gym Login successfully",
+      { tokens, trainerData },
+    )
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -112,14 +144,17 @@ exports.trainerCreate = async (req, res) => {
     const {
       gym_id = '',
       first_name = '',
-      last_name = '',
       email = '',
       phone_number = '',
     } = req?.body
 
-    if (!(gym_id && first_name && last_name && email && phone_number)) {
+    if (!(gym_id && first_name && email && phone_number)) {
       await t.rollback()
-      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+      return responseHandler.unauthorized(
+        res,
+        "Invalid Data",
+        "data is not correct",
+      )
     }
 
     let isExisting = await uniqueCheck(Trainer, req.body, "Trainer",)
@@ -181,7 +216,15 @@ exports.trainerCreate = async (req, res) => {
 exports.trainerUpdate = async (req, res) => {
   try {
     const { id: trainer_id = '' } = req?.params
-    const { gym_id, user_id, email, phone_number, trainer_type, ...rest } = req?.body
+    const {
+      gym_id,
+      user_id,
+      trainer_type,
+      email,
+      phone_number,
+      deleted,
+      ...rest
+    } = req?.body
 
     if (!trainer_id) {
       return responseHandler.error(
@@ -206,16 +249,9 @@ exports.trainerUpdate = async (req, res) => {
 exports.trainerUpdatePhone = async (req, res) => {
   try {
     const { id: trainer_id = '', } = req?.params
-    const { gym_id: gymId = '', phone_number = '', } = req?.body
-    let trainerData = {}
-    let gym_id = gymId
+    const { phone_number = '', } = req?.body
 
-    if (!gymId) {
-      trainerData = await trainer.getTrainerById(trainer_id)
-      gym_id = trainerData.gym_id
-    }
-
-    if (!(trainer_id && gym_id && phone_number)) {
+    if (!(trainer_id && phone_number)) {
       return responseHandler.error(
         res,
         400,
@@ -224,7 +260,7 @@ exports.trainerUpdatePhone = async (req, res) => {
       )
     }
 
-    await trainer.updateTrainerByGymId(trainer_id, gym_id, { phone_number },)
+    await trainer.updateTrainer(trainer_id, { phone_number },)
 
     // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
 
@@ -240,16 +276,9 @@ exports.trainerUpdateEmail = async (req, res) => {
 
   try {
     const { id: trainer_id = '' } = req?.params
-    const { gym_id: gymId = '', email = '', } = req?.body
-    let trainerData = {}
-    let gym_id = gymId
+    const { email = '', } = req?.body
 
-    if (!gymId) {
-      trainerData = await trainer.getTrainerById(trainer_id)
-      gym_id = trainerData.gym_id
-    }
-
-    if (!(trainer_id && gym_id && email)) {
+    if (!(trainer_id && email)) {
       await t.rollback()
       return responseHandler.error(
         res,
@@ -259,11 +288,10 @@ exports.trainerUpdateEmail = async (req, res) => {
       )
     }
 
-    const trainerUpdateData = await trainer.updateTrainerByGymId(trainer_id, gym_id, { email }, t)
+    const trainerUpdateData = await trainer.updateTrainer(trainer_id, { email }, t)
 
     if (!trainerUpdateData[0]) {
       await t.rollback()
-
       return responseHandler.error(
         res,
         400,
@@ -274,11 +302,20 @@ exports.trainerUpdateEmail = async (req, res) => {
 
     let userData = await user.findUserByLinkedId(trainer_id)
 
+    if (!userData.id) {
+      await t.rollback()
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
     const userUpdateData = await user.updateUser(userData.id, { email }, t)
 
     if (!userUpdateData[0]) {
       await t.rollback()
-
       return responseHandler.error(
         res,
         400,
@@ -295,23 +332,16 @@ exports.trainerUpdateEmail = async (req, res) => {
   }
   catch (error) {
     await t.rollback()
-    return responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
 exports.trainerUpdatePassword = async (req, res) => {
   try {
     const { id: trainer_id = '' } = req?.params
-    const { gym_id: gymId = '', password = '', } = req?.body
-    let trainerData = {}
-    let gym_id = gymId
+    const { password = '', } = req?.body
 
-    if (!gymId) {
-      trainerData = await trainer.getTrainerById(trainer_id)
-      gym_id = trainerData.gym_id
-    }
-
-    if (!(trainer_id && gym_id && password)) {
+    if (!(trainer_id && password)) {
       return responseHandler.error(
         res,
         400,
@@ -322,14 +352,14 @@ exports.trainerUpdatePassword = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    await user.updateUserPassword(trainer_id, hashedPassword)
+    await user.updateUserPasswordByLinkedId(trainer_id, hashedPassword)
 
     // await addActivity(TrainerActivities, id, "TRAINER_UPDATED", "trainer updated")
 
-    responseHandler.success(res, "Trainer Password Updated successfully")
+    return responseHandler.success(res, "Trainer Password Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -350,10 +380,10 @@ exports.trainerDelete = async (req, res) => {
 
     // await addActivity(TrainerActivities, id, "TRAINER_DELETED", "trainer deleted")
 
-    responseHandler.success(res, "Trainer Deleted successfully")
+    return responseHandler.success(res, "Trainer Deleted successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -374,9 +404,9 @@ exports.trainerRestore = async (req, res) => {
 
     // await addActivity(TrainerActivities, id, "TRAINER_RESTORED", "trainer restored")
 
-    responseHandler.success(res, "Trainer Restored successfully")
+    return responseHandler.success(res, "Trainer Restored successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, error.message, "")
+    return responseHandler.error(res, 500, error.message, "")
   }
 }

@@ -6,27 +6,63 @@ const { uniqueCheck } = require("../../utils/uniqueCheck")
 const { addActivity } = require("../../utils/activities")
 const Trainee = db.sequelize.model('trainees')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
-const trainee = require("../../services/trainee/trainee")
 const user = require('../../services/user/user');
+const trainer = require("../../services/trainer/trainer")
+const trainee = require("../../services/trainee/trainee")
+const { generateTokens } = require('../../utils/auth');
 
 exports.traineeLogin = async (req, res) => {
   try {
     const { email = '', password = '' } = req?.body
 
     if (!(email && password)) {
-      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+      return responseHandler.unauthorized(
+        res,
+        "Unauthorized",
+        "email or password not found",
+      )
     }
 
-    const resp = await trainee.loginTrainee({ email, password })
+    const userData = await user.findUserByEmail(email)
 
-    if (!(Object.keys(resp).length > 0)) {
-      return responseHandler.unauthorized(res, "Email or Password is Incorrect", "email or password is incorrect or no data found")
+    if (!(Object.keys(userData).length > 0)) {
+      return responseHandler.unauthorized(
+        res,
+        "Unauthorized",
+        "email or password not found",
+      )
     }
 
-    responseHandler.success(res, "Admin Login successfully", resp)
+    const isMatch = await bcrypt.compare(password, userData.password)
+
+    if (!isMatch) {
+      return responseHandler.unauthorized(
+        res,
+        "Unauthorized",
+        "email or password not found",
+      )
+    }
+
+    const traineeData = await trainee.getTraineeById(userData.linked_id)
+
+    const tokens = generateTokens({ id: traineeData.id, role: userData.role })
+
+    if (!(Object.keys(traineeData).length > 0)) {
+      return responseHandler.unauthorized(
+        res,
+        "Unauthorized",
+        "email or password not found",
+      )
+    }
+
+    return responseHandler.success(
+      res,
+      "Trainee Login successfully",
+      { tokens, traineeData },
+    )
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -34,10 +70,10 @@ exports.traineeLogout = async (req, res) => {
   try {
     const tokens = await trainee.logoutTrainee(req.body)
 
-    responseHandler.success(res, "Trainee Logout successfully", tokens)
+    return responseHandler.success(res, "Trainee Logout successfully", tokens)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -50,7 +86,7 @@ exports.traineeActivities = async (req, res) => {
     return responseHandler.success(res, "Trainee Data Fetched successfully", data)
   }
   catch (error) {
-    return responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -67,7 +103,7 @@ exports.traineeAllByTrainerId = async (req, res) => {
     return responseHandler.success(res, "Trainees Fetched successfully", data)
   }
   catch (error) {
-    return responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -84,7 +120,7 @@ exports.traineeById = async (req, res) => {
     return responseHandler.success(res, "Trainee Data Fetched successfully", data)
   }
   catch (error) {
-    return responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -95,16 +131,19 @@ exports.traineeCreate = async (req, res) => {
   try {
     const {
       gym_id = '',
-      trainer_id = '',
       first_name = '',
       age = '',
       email = '',
       phone_number = '',
     } = req?.body
 
-    if (!(gym_id && trainer_id && first_name && age && email && phone_number)) {
+    if (!(gym_id && first_name && age && email && phone_number)) {
       await t.rollback()
-      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+      return responseHandler.unauthorized(
+        res,
+        "Invalid Data",
+        "data is not correct",
+      )
     }
 
     let isExisting = await uniqueCheck(Trainee, req.body, "Trainee",)
@@ -114,7 +153,9 @@ exports.traineeCreate = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    let traineeData = await trainee.createTrainee({ ...req.body, }, t,)
+    const trainerData = await trainer.getTrainerByGymId(gym_id)
+
+    let traineeData = await trainee.createTrainee({ ...req.body, trainer_id: trainerData.id }, t,)
 
     if (!(traineeData?.id && traineeData?.gym_id && traineeData?.trainer_id)) {
       await t.rollback()
@@ -136,9 +177,12 @@ exports.traineeCreate = async (req, res) => {
       return responseHandler.error(res, 400, "Failed to Create Trainee's User")
     }
 
-    console.log(userData, "ddddddddddd")
+    console.log(userData.id, "userData.iduserData.iduserData.id")
+    console.log(traineeData.id, "traineeData.idtraineeData.idtraineeData.id")
 
-    await trainee.updateTrainee(traineeData.id, { user_id: userData.id }, t,)
+    let tt = await trainee.updateTrainee(traineeData.id, { user_id: userData.id }, t,)
+
+    console.log(tt, "tttttttttttttttt")
 
     // await addActivity(
     //   TrainerActivities,
@@ -160,14 +204,23 @@ exports.traineeCreate = async (req, res) => {
     return responseHandler.success(res, "Trainee Created Successfully", traineeData)
   }
   catch (error) {
-    return responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
 exports.traineeUpdate = async (req, res) => {
   try {
     const { id = '' } = req?.params
-    const { number, email, password, ...rest } = req?.body
+    const {
+      user_id,
+      gym_id,
+      trainer_id,
+      email,
+      phone_number,
+      rating,
+      deleted,
+      ...rest
+    } = req?.body
 
     await trainee.updateTrainee(id, rest)
 
@@ -176,55 +229,123 @@ exports.traineeUpdate = async (req, res) => {
     responseHandler.success(res, "Trainee Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
 exports.traineeUpdatePhone = async (req, res) => {
   try {
-    const { id = '' } = req?.params
-    const { number, email, password, ...rest } = req?.body
+    const { id: trainee_id = '', } = req?.params
+    const { phone_number = '', } = req?.body
 
-    await trainee.updateTrainee(id, rest)
+    if (!(trainee_id && phone_number)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
+    }
+
+    await trainee.updateTrainee(trainee_id, { phone_number })
 
     // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
 
-    responseHandler.success(res, "Trainee Updated successfully")
+    return responseHandler.success(res, "Trainee Phone Number Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
 exports.traineeUpdateEmail = async (req, res) => {
-  try {
-    const { id = '' } = req?.params
-    const { number, email, password, ...rest } = req?.body
+  const t = await db.sequelize.transaction()
 
-    await trainee.updateTrainee(id, rest)
+  try {
+    const { id: trainee_id = '' } = req?.params
+    const { email = '', } = req?.body
+
+    if (!(trainee_id && email)) {
+      await t.rollback()
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
+    const traineeUpdateData = await trainee.updateTrainee(trainee_id, { email }, t,)
+
+    if (!traineeUpdateData[0]) {
+      await t.rollback()
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
+    let userData = await user.findUserByLinkedId(trainee_id)
+
+    if (!userData.id) {
+      await t.rollback()
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
+
+    const userUpdateData = await user.updateUser(userData.id, { email }, t)
+
+    if (!userUpdateData[0]) {
+      await t.rollback()
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "required fields are empty or invalid",
+      )
+    }
 
     // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
 
-    responseHandler.success(res, "Trainee Updated successfully")
+    await t.commit()
+
+    return responseHandler.success(res, "Trainee Email Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
 exports.traineeUpdatePassword = async (req, res) => {
   try {
-    const { id = '' } = req?.params
-    const { number, email, password, ...rest } = req?.body
+    const { id: trainee_id = '' } = req?.params
+    const { password = '', } = req?.body
 
-    await trainee.updateTrainee(id, rest)
+    if (!(trainee_id && password)) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await user.updateUserPasswordByLinkedId(trainee_id, hashedPassword)
 
     // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
 
-    responseHandler.success(res, "Trainee Updated successfully")
+    return responseHandler.success(res, "Trainee Password Updated successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -243,7 +364,7 @@ exports.traineeDelete = async (req, res) => {
     responseHandler.success(res, "Trainee Deleted successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -262,6 +383,6 @@ exports.traineeRestore = async (req, res) => {
     responseHandler.success(res, "Trainee Restored successfully")
   }
   catch (error) {
-    responseHandler.error(res, 500, error.message, "")
+    responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }

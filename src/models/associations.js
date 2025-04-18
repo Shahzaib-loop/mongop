@@ -5,7 +5,7 @@ const GymActivities = require("./gymActivities")
 const TrainerActivities = require("./trainerActivities")
 const TraineeActivities = require("./traineeActivities")
 const Admins = require("./admin")
-const GymOwner = require("./gymOwner")
+const GymOwner = require("./gymOwners")
 const Gym = require("./gym")
 const Trainer = require("./trainer")
 const Trainee = require("./trainee")
@@ -49,7 +49,7 @@ User.belongsTo(Trainee, { foreignKey: 'linked_id', constraints: false, })
 
 
 //  ==== Gym ============================================================
-Gym.hasMany(GymOwner, { foreignKey: 'owner_ids', as: 'owners' })
+Gym.hasMany(GymOwner, { foreignKey: 'gym_id', as: 'owners' })
 GymOwner.belongsTo(Gym, { foreignKey: 'gym_id' })
 
 Gym.hasMany(Trainer, { foreignKey: 'gym_id', as: 'trainers' })

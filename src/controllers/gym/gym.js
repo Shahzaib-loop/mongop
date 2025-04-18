@@ -53,12 +53,22 @@ exports.gymLogin = async (req, res) => {
       )
     }
 
+    const gymData = await gym.getGymById(userData.linked_id)
+
+    if (!gymData?.id) {
+      return responseHandler.unauthorized(
+        res,
+        "Invalid Email or Password",
+        "email or password is incorrect or incorrect data"
+      )
+    }
+
     const token = generateTokens(userData)
 
-    return responseHandler.success(res, "Gym Login successfully", { token, userData, })
+    return responseHandler.success(res, "Gym Login successfully", { token, gym_data: gymData, })
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -81,10 +91,10 @@ exports.gymLogout = async (req, res) => {
       return responseHandler.error(res, 500, "Logout failed", "failed to process logout")
     }
 
-    responseHandler.success(res, "Gym Logout successfully", result)
+    return responseHandler.success(res, "Gym Logout successfully", result)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message)
+    return responseHandler.error(res, 500, "", error.message)
   }
 }
 
@@ -94,10 +104,10 @@ exports.gymActivities = async (req, res) => {
 
     const data = await gym.getGymActivities(id)
 
-    responseHandler.success(res, "Gym Activities Fetched successfully", data)
+    return responseHandler.success(res, "Gym Activities Fetched successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -105,23 +115,32 @@ exports.gymAll = async (req, res) => {
   try {
     const data = await gym.getAllGyms()
 
-    responseHandler.success(res, "Gyms Fetched successfully", data)
+    return responseHandler.success(res, "Gyms Fetched successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
 exports.gymById = async (req, res) => {
   try {
-    const { id = '' } = req?.params
+    const { id: gym_id = '' } = req?.params
 
-    const data = await gym.getGymById(id)
+    if (!gym_id) {
+      return responseHandler.error(
+        res,
+        400,
+        "Data Not Valid",
+        "data invalid or missing"
+      )
+    }
 
-    responseHandler.success(res, "Gym Data Fetched successfully", data)
+    const data = await gym.getGymById(gym_id)
+
+    return responseHandler.success(res, "Gym Data Fetched successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -173,6 +192,8 @@ exports.gymCreate = async (req, res) => {
 
     const owner_ids = gymOwnerData.map(ele => ele.id)
 
+    console.log(owner_ids, "owner_idsowner_idsowner_ids")
+
     // =====>>>>>>> gym creation
     const gymData = await gym.createGym({ ...req.body, owner_ids }, t,)
 
@@ -183,7 +204,7 @@ exports.gymCreate = async (req, res) => {
     await gym.updateGym(gymData.id, { user_id: gymUser.id }, t)
 
     // =====>>>>>>> gym owner updated
-    for (let i = 0; i < owner_ids; i++) {
+    for (let i = 0; i < owner_ids.length; i++) {
       await gymOwner.updateGymOwner(owner_ids[i], { gym_id: gymData.id, }, t,)
     }
     const trainerDatum = {
@@ -344,6 +365,15 @@ exports.gymUpdateEmail = async (req, res) => {
 
     const gymUser = await user.findUserByLinkedId(gym_id)
 
+    if (!gymUser.id) {
+      return responseHandler.error(
+        res,
+        400,
+        "Required Fields are Invalid",
+        "Id is empty or invalid",
+      )
+    }
+
     const userUpdateData = await user.updateUser(gymUser.id, { email }, t,)
 
     if (!userUpdateData[0]) {
@@ -356,6 +386,7 @@ exports.gymUpdateEmail = async (req, res) => {
         "required fields are empty or invalid",
       )
     }
+
     // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 
     await t.commit()
@@ -364,7 +395,7 @@ exports.gymUpdateEmail = async (req, res) => {
   }
   catch (error) {
     await t.rollback()
-    return responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "Internal Server Error", error.message,)
   }
 }
 
@@ -384,7 +415,7 @@ exports.gymUpdatePassword = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    await user.updateUserPassword(gym_id, hashedPassword)
+    await user.updateUserPasswordByLinkedId(gym_id, hashedPassword)
 
     // await addActivity(GymActivities, 'gym_id', id, "GYM_UPDATED", "gym updated")
 

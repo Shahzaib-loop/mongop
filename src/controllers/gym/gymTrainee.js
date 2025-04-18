@@ -6,25 +6,32 @@ const { uniqueCheck } = require('../../utils/uniqueCheck')
 const { addActivity } = require('../../utils/activities')
 const Trainee = db.sequelize.model('trainees')
 const gym = require('../../services/gym/gym')
+const trainer = require('../../services/trainer/trainer')
 const trainee = require('../../services/trainee/trainee')
 // const GymActivities = db.sequelize.model('gym_activities')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
 
+//  ============================================================================
+//  abhi ke liye gym directly trainee add ni kr sakta usko default trainer se
+//  login krke trainee ko manage krna hoga
+
+// jab gym create ho to ek default trainer us gym ka bn jay
+// jab gym directly trainee add kray to default wala trainer lag jay
+// or agr trainer koi trainee add kray ga to wo us trainer ke under ay ga
+
 exports.addGymTrainee = async (req, res) => {
+  const t = await db.sequelize.transaction()
+  const tempPassword = 'Trainer1234'
+
   try {
-    //  abhi ke liye gym directly trainee add ni kr sakta usko default trainer se
-    //  login krke trainee ko manage krna hoga
+    const {
+      gym_id = '',
+      firstName = '',
+      email = '',
+      number = '',
+    } = req?.body
 
-    // jab gym create ho to ek default trainer us gym ka bn jay
-    // jab gym directly trainee add kray to default wala trainer lag jay
-    // or agr trainer koi trainee add kray ga to wo us trainer ke under ay ga
-
-    const { id = '', } = req?.params
-    const { firstName = '', lastName = '', email = '', number = '', } = req?.body
-
-    console.log(req.body)
-
-    if (!(id && firstName && lastName && email && number)) {
+    if (!(gym_id && firstName && email && number)) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 
@@ -34,14 +41,18 @@ exports.addGymTrainee = async (req, res) => {
       return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
     }
 
-    const trainerData = await gym.getGymTrainer(id)
+    const trainerData = await trainer.getAllTrainerByGymId(gym_id)
 
     console.log(trainerData, "rrrrrrrrrr trainerDatatrainerDatatrainerData")
 
-    const tempPassword = 'Trainee1234'
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-    let trainee = await trainee.createTrainee({ ...req.body, gym_id: id, trainer_id: trainerData.id, password: hashedPassword })
+    let trainee = await trainee.createTrainee({
+      ...req.body,
+      gym_id,
+      trainer_id: trainerData.id,
+      password: hashedPassword
+    })
 
     if (!(Object.keys(trainee).length > 0)) {
       responseHandler.error(res, 400, "", "",)
@@ -62,10 +73,10 @@ exports.addGymTrainee = async (req, res) => {
     //   "trainee created by gym"
     // )
 
-    responseHandler.success(res, "Trainee Created Successfully", trainee)
+    return responseHandler.success(res, "Trainee Created Successfully", trainee)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 

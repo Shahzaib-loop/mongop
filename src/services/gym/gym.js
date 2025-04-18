@@ -48,16 +48,21 @@ exports.getAllGyms = async () => {
       //   as: 'gymActivities'
       // },
       {
-        model: Trainee,
-        as: 'trainees',
+        model: GymOwner,
+        as: 'owners',
       },
       {
         model: Trainer,
         as: 'trainers',
+        include: {
+          model: Trainee,
+          as: 'trainees',
+        },
       },
       {
         model: User,
         as: 'gym_user',
+        attributes: ['linked_id', 'email', 'role', 'deleted', 'createdAt', 'updatedAt',]
       },
     ]
   })
@@ -88,6 +93,7 @@ exports.getGymById = async (id) => {
       {
         model: User,
         as: 'gym_user',
+        attributes: ['linked_id', 'email', 'role', 'deleted', 'createdAt', 'updatedAt',]
       },
     ]
   })

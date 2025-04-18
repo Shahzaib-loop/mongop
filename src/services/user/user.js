@@ -1,6 +1,7 @@
 const db = require('../../models');
 const User = db.sequelize.model('unified_users')
 const Gym = db.sequelize.model('gyms')
+// const GymActivities = db.sequelize.model('gym_activities')
 const GymOwner = db.sequelize.model('gym_owners')
 const Trainer = db.sequelize.model('trainers')
 const Trainee = db.sequelize.model('trainees')
@@ -21,6 +22,6 @@ exports.updateUser = async (id, data, t) => {
   return User.update(data, { where: { id }, transaction: t })
 }
 
-exports.updateUserPassword = async (linked_id, password, t) => {
+exports.updateUserPasswordByLinkedId = async (linked_id, password, t) => {
   return User.update({ password }, { where: { linked_id }, transaction: t })
 }

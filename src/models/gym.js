@@ -13,10 +13,6 @@ const gyms = sequelize.define("gyms",
       type: DataTypes.UUID,
       allowNull: true,
     },
-    owner_ids: {
-      type: DataTypes.ARRAY(DataTypes.UUID),
-      allowNull: false,
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,

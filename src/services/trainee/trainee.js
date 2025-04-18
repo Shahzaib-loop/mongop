@@ -4,22 +4,6 @@ const { generateTokens } = require('../../utils/auth')
 const Trainee = db.sequelize.model('trainees')
 // const TraineeActivities = db.sequelize.model('trainee_activities')
 
-exports.loginTrainee = async ({ email, password }) => {
-  const trainee = await Trainee.findOne({ where: { email }, raw: true })
-
-  if (!(Object.keys(trainee).length > 0)) return false
-
-  const isMatch = await bcrypt.compare(password, trainee.password)
-
-  if (!isMatch) return false
-
-  const tokens = generateTokens(trainee)
-
-  if (!(Object.keys(tokens).length > 0)) return false
-
-  return { trainee, tokens }
-}
-
 exports.logoutTrainee = async (email) => {
   return email
 }

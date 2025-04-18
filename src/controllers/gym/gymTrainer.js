@@ -31,10 +31,10 @@ exports.trainerAllByGymId = async (req, res) => {
 
     const data = await trainer.getAllTrainerByGymId(gym_id)
 
-    responseHandler.success(res, "Trainees Fetched successfully", data)
+    return responseHandler.success(res, "Trainees Fetched successfully", data)
   }
   catch (error) {
-    responseHandler.error(res, 500, "", error.message,)
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 

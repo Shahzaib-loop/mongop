@@ -5,22 +5,6 @@ const Trainer = db.sequelize.model('trainers')
 const Trainee = db.sequelize.model('trainees')
 // const TrainerActivities = db.sequelize.model('trainer_activities')
 
-exports.loginTrainer = async ({ email, password }) => {
-  const trainer = await Trainer.findOne({ where: { email }, raw: true })
-
-  if (!(Object.keys(trainer).length > 0)) return false
-
-  const isMatch = await bcrypt.compare(password, trainer.password)
-
-  if (!isMatch) return false
-
-  const tokens = generateTokens(trainer)
-
-  if (!(Object.keys(tokens).length > 0)) return false
-
-  return { trainer, tokens }
-}
-
 exports.logoutTrainer = async (email) => {
   return email
 }
@@ -34,7 +18,13 @@ exports.getAllTrainers = async () => {
 }
 
 exports.getAllTrainerByGymId = async (gym_id) => {
-  return Trainer.findAll({ where: { gym_id, deleted: false } })
+  return Trainer.findAll({
+    where: { gym_id, deleted: false, },
+    include: {
+      model: Trainee,
+      as: 'trainees',
+    }
+  })
 }
 
 exports.getTrainerById = async (id) => {
@@ -52,16 +42,27 @@ exports.getTrainerById = async (id) => {
   })
 }
 
+exports.getTrainerByGymId = async (gym_id) => {
+  return Trainer.findOne({
+    where: { gym_id, deleted: false, },
+    // include: [
+    //   {
+    //     model: TrainerActivities,
+    //   },
+    //   {
+    //     model: Trainee,
+    //     as: 'trainees',
+    //   },
+    // ]
+  })
+}
+
 exports.createTrainer = async (data, t) => {
   return Trainer.create(data, { transaction: t })
 }
 
 exports.updateTrainer = async (id, data, t,) => {
   return Trainer.update(data, { where: { id, }, transaction: t })
-}
-
-exports.updateTrainerByGymId = async (id, gym_id, data, t,) => {
-  return Trainer.update(data, { where: { id, gym_id, }, transaction: t })
 }
 
 exports.updateDefaultTrainer = async (gym_id, data, t,) => {
