@@ -44,6 +44,32 @@ const trainers = sequelize.define("trainers",
         isNumeric: true,
       },
     },
+    specialization: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    experience_years: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    timings: {
+      type: DataTypes.INTEGER,
+    },
+    medical_conditions: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'none',
+    },
+    rating: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
     deleted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

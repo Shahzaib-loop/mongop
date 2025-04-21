@@ -17,7 +17,7 @@ exports.getAllTrainees = async () => {
 }
 
 exports.getAllTraineeByTrainerId = async (trainer_id) => {
-  return Trainee.findAll({ where: { trainer_id } })
+  return Trainee.findAll({ where: { trainer_id, deleted: false, } })
 }
 
 exports.getTraineeById = async (id) => {

@@ -107,10 +107,27 @@ exports.trainerAll = async (req, res) => {
   try {
     const data = await trainer.getAllTrainers()
 
-    responseHandler.success(res, "Trainees Fetched successfully", data)
+    responseHandler.success(res, "Trainers Fetched successfully", data)
   }
   catch (error) {
     responseHandler.error(res, 500, "", error.message,)
+  }
+}
+
+exports.trainerAllByGymId = async (req, res) => {
+  try {
+    const { gym_id = '', } = req.body
+
+    if (!gym_id) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    const data = await trainer.getAllTrainerByGymId(gym_id)
+
+    return responseHandler.success(res, "Trainees Fetched successfully", data)
+  }
+  catch (error) {
+    return responseHandler.error(res, 500, "", error.message,)
   }
 }
 
@@ -290,7 +307,7 @@ exports.trainerUpdateEmail = async (req, res) => {
 
     const trainerUpdateData = await trainer.updateTrainer(trainer_id, { email }, t)
 
-    if (!trainerUpdateData[0]) {
+    if (!trainerUpdateData?.[0]) {
       await t.rollback()
       return responseHandler.error(
         res,
@@ -302,7 +319,7 @@ exports.trainerUpdateEmail = async (req, res) => {
 
     let userData = await user.findUserByLinkedId(trainer_id)
 
-    if (!userData.id) {
+    if (!userData?.id) {
       await t.rollback()
       return responseHandler.error(
         res,
@@ -314,7 +331,7 @@ exports.trainerUpdateEmail = async (req, res) => {
 
     const userUpdateData = await user.updateUser(userData.id, { email }, t)
 
-    if (!userUpdateData[0]) {
+    if (!userUpdateData?.[0]) {
       await t.rollback()
       return responseHandler.error(
         res,
@@ -365,9 +382,9 @@ exports.trainerUpdatePassword = async (req, res) => {
 
 exports.trainerDelete = async (req, res) => {
   try {
-    const { id = '', } = req?.params
+    const { id: trainer_id = '', } = req?.params
 
-    if (!id) {
+    if (!trainer_id) {
       return responseHandler.error(
         res,
         400,
@@ -376,9 +393,9 @@ exports.trainerDelete = async (req, res) => {
       )
     }
 
-    await trainer.deleteTrainer(id)
+    await trainer.deleteTrainer(trainer_id)
 
-    // await addActivity(TrainerActivities, id, "TRAINER_DELETED", "trainer deleted")
+    // await addActivity(TrainerActivities, trainer_id, "TRAINER_DELETED", "trainer deleted")
 
     return responseHandler.success(res, "Trainer Deleted successfully")
   }
@@ -389,9 +406,9 @@ exports.trainerDelete = async (req, res) => {
 
 exports.trainerRestore = async (req, res) => {
   try {
-    const { id = '', } = req?.params
+    const { id: trainer_id = '', } = req?.params
 
-    if (!id) {
+    if (!trainer_id) {
       return responseHandler.error(
         res,
         400,
@@ -400,9 +417,9 @@ exports.trainerRestore = async (req, res) => {
       )
     }
 
-    await trainer.restoreTrainer(id)
+    await trainer.restoreTrainer(trainer_id)
 
-    // await addActivity(TrainerActivities, id, "TRAINER_RESTORED", "trainer restored")
+    // await addActivity(TrainerActivities, trainer_id, "TRAINER_RESTORED", "trainer restored")
 
     return responseHandler.success(res, "Trainer Restored successfully")
   }

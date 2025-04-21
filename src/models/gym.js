@@ -56,6 +56,9 @@ const gyms = sequelize.define("gyms",
         isNumeric: true,
       },
     },
+    subscription_plan:{
+      type: DataTypes.STRING,
+    },
     deleted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

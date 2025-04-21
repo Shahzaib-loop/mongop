@@ -1,8 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const gym = require('../../controllers/gym/gym')
-const gymTrainer = require('../../controllers/gym/gymTrainer')
-const gymTrainee = require('../../controllers/gym/gymTrainee')
 const trainer = require('../../controllers/trainer/trainer')
 const trainee = require('../../controllers/trainee/trainee')
 
@@ -11,7 +9,6 @@ router.get('/listen', (req, res, next) => {
   res.json({ title: 'I am Gym', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-router.post('/register', gym.gymCreate)
 router.post('/login', gym.gymLogin)
 router.post('/logout', gym.gymLogout)
 
@@ -29,20 +26,24 @@ router.post('/updatePassword/:id', gym.gymUpdatePassword)
 router.post('/delete/:id', gym.gymDelete)
 router.post('/restore/:id', gym.gymRestore)
 
-router.post('/trainer', gymTrainer.trainerAllByGymId)
+// ==========>>>> trainer
+router.post('/trainer', trainer.trainerAllByGymId)
 router.post('/addTrainer', trainer.trainerCreate)
 router.post('/updateTrainer/:id', trainer.trainerUpdate)
 router.post('/updateTrainerPhone/:id', trainer.trainerUpdatePhone)
 router.post('/updateTrainerEmail/:id', trainer.trainerUpdateEmail)
 router.post('/updateTrainerPassword/:id', trainer.trainerUpdatePassword)
+
 router.post('/deleteTrainer/:id', trainer.trainerDelete)
 router.post('/restoreTrainer/:id', trainer.trainerRestore)
 
+// ==========>>>> trainee
 router.post('/addTrainee', trainee.traineeCreate)
 router.post('/updateTrainee/:id', trainee.traineeUpdate)
 router.post('/updateTraineePhone/:id', trainee.traineeUpdatePhone)
 router.post('/updateTraineeEmail/:id', trainee.traineeUpdateEmail)
 router.post('/updateTraineePassword/:id', trainee.traineeUpdatePassword)
+
 router.post('/deleteTrainee/:id', trainee.traineeDelete)
 router.post('/restoreTrainee/:id', trainee.traineeRestore)
 

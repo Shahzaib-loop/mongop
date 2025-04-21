@@ -64,6 +64,12 @@ const trainees = sequelize.define("trainees",
     },
     medical_condition: {
       type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'none',
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     goal: {
       type: DataTypes.STRING,

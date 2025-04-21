@@ -210,7 +210,7 @@ exports.traineeCreate = async (req, res) => {
 
 exports.traineeUpdate = async (req, res) => {
   try {
-    const { id = '' } = req?.params
+    const { id: trainee_id = '' } = req?.params
     const {
       user_id,
       gym_id,
@@ -222,9 +222,19 @@ exports.traineeUpdate = async (req, res) => {
       ...rest
     } = req?.body
 
-    await trainee.updateTrainee(id, rest)
+    if (!trainee_id) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
 
-    // await addActivity(TraineeActivities, 'trainee_id', id, "TRAINEE_UPDATED", "trainee updated")
+    let isExisting = await uniqueCheck(Trainee, req.body, "trainee",)
+
+    if (isExisting?.reason) {
+      return responseHandler.error(res, 409, isExisting.message, isExisting.reason)
+    }
+
+    await trainee.updateTrainee(trainee_id, rest)
+
+    // await addActivity(TraineeActivities, 'trainee_id', trainee_id, "TRAINEE_UPDATED", "trainee updated")
 
     responseHandler.success(res, "Trainee Updated successfully")
   }
