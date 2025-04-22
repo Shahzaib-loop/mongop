@@ -21,12 +21,19 @@ const trainees = sequelize.define("trainees",
       type: DataTypes.UUID,
       allowNull: false,
     },
+    profileImage: {
+      type: DataTypes.STRING,
+    },
     first_name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     last_name: {
       type: DataTypes.STRING,
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
@@ -67,11 +74,10 @@ const trainees = sequelize.define("trainees",
       allowNull: false,
       defaultValue: 'none',
     },
-    gender: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     goal: {
+      type: DataTypes.STRING,
+    },
+    achievements: {
       type: DataTypes.STRING,
     },
     deleted: {
