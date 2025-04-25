@@ -1,10 +1,18 @@
 const db = require("../../models")
 const { generateTokens } = require('../../utils/auth')
-const User = db.sequelize.model('unified_users')
-const Gym = db.sequelize.model('gyms')
-const GymOwner = db.sequelize.model('gym_owners')
-const Trainee = db.sequelize.model('trainees')
-const Trainer = db.sequelize.model('trainers')
+// const User = db.sequelize.model('unified_users')
+// const Gym = db.sequelize.model('gyms')
+// const GymOwner = db.sequelize.model('gym_owners')
+// const Trainee = db.sequelize.model('trainees')
+// const Trainer = db.sequelize.model('trainers')
+
+const User = db.unified_users
+// const { Gym } = require('../../models'); // or wherever your model path is
+const Gym  = require('../../models/gym'); // or wherever your model path is
+const GymOwner = db.gym_owners
+const Trainee = db.trainees
+const Trainer = db.trainers
+
 // const GymActivities = db.sequelize.model('gym_activities')
 
 // const loginGym = async ({ email, password }) => {

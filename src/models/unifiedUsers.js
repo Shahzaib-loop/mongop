@@ -1,55 +1,55 @@
-const { sequelize } = require("../config/db")
-const { DataTypes } = require("sequelize")
-
-const unified_users = sequelize.define("unified_users", {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
-      primaryKey: true,
-    },
-    linked_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true
-      }
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isIn: [['admin', 'gym', 'trainer', 'trainee']]
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define("unified_users", {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true,
+      },
+      linked_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true
+        }
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      role: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          isIn: [['admin', 'gym', 'trainer', 'trainee']]
+        },
+      },
+      deleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
       },
     },
-    deleted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    timestamps: true
-  }
-)
+    {
+      timestamps: true
+    }
+  )
 
-module.exports = unified_users
+  return User
+}
+
 
 //  to check constrains
 //
