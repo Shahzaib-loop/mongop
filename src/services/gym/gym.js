@@ -7,8 +7,7 @@ const { generateTokens } = require('../../utils/auth')
 // const Trainer = db.sequelize.model('trainers')
 
 const User = db.unified_users
-// const { Gym } = require('../../models'); // or wherever your model path is
-const Gym  = require('../../models/gym'); // or wherever your model path is
+const Gym = db.gyms
 const GymOwner = db.gym_owners
 const Trainee = db.trainees
 const Trainer = db.trainers

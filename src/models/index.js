@@ -30,28 +30,21 @@ const logger = require('../utils/logger');
 const db = {
   sequelize,
   Sequelize,
-};
+}
 
-// Auto-import all model files
+// Dynamically load all model files except index.js
 fs.readdirSync(__dirname)
-  .filter(file => file !== 'index.js' && file.endsWith('.js'))
-  .forEach(file => {
+  .filter((file) => file !== 'index.js' && file.endsWith('.js'))
+  .forEach((file) => {
     const model = require(path.join(__dirname, file))(sequelize, DataTypes);
-
-    try {
-      console.log(`Loading model: ${file}`);
-      // const model = require(path.join(__dirname, file))(sequelize, DataTypes);
-      db[model.name] = model;
-    } catch (err) {
-      console.error(`❌ ${model} Error loading model ${file}:`, err.message);
-    }
+    db[model.name] = model;  // Store the model in db object
   });
 
-
-// Setup associations if present
-if (fs.existsSync(path.join(__dirname, 'associations.js'))) {
-  require('./associations')(db);
+// Set up associations (if you have associations in a separate file)
+if (fs.existsSync(path.join(__dirname, 'zAssociations.js'))) {
+  require('./zAssociations')(db);  // Apply associations after loading models
 }
+
 
 (async () => {
   try {
@@ -59,10 +52,13 @@ if (fs.existsSync(path.join(__dirname, 'associations.js'))) {
     logger.info("PostgreSQL Connected Successfully");
     await sequelize.sync();
     logger.info("Tables synced!");
-  } catch (err) {
-    logger.error(`PostgreSQL connection error: ${err}`);
+  }
+  catch (err) {
+    logger.error(`PostgreSQL connection error: ${ err }`);
   }
 })();
+
+console.log(db,'yyyyyyyyyyyyyyyyy')
 
 module.exports = db;
 
