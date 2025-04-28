@@ -21,11 +21,11 @@ const trainers = sequelize.define("trainers",
       type: DataTypes.STRING,
       defaultValue: "non_default",
     },
+    profile_image: {
+      type: DataTypes.STRING,
+    },
     bio: {
       type: DataTypes.TEXT,
-    },
-    profileImage: {
-      type: DataTypes.STRING,
     },
     first_name: {
       type: DataTypes.STRING,
@@ -56,7 +56,6 @@ const trainers = sequelize.define("trainers",
     },
     specialties: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     experience_years: {
       type: DataTypes.INTEGER,
@@ -76,6 +75,10 @@ const trainers = sequelize.define("trainers",
     },
     total_sessions: {
       type: DataTypes.INTEGER,
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     deleted: {
       type: DataTypes.BOOLEAN,

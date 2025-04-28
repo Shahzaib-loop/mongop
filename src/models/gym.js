@@ -13,6 +13,9 @@ const gyms = sequelize.define("gyms",
       type: DataTypes.UUID,
       allowNull: true,
     },
+    logo_url: {
+      type: DataTypes.STRING,
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -56,31 +59,31 @@ const gyms = sequelize.define("gyms",
         isNumeric: true,
       },
     },
-    start_time: {
+    opening_time: {
       type: DataTypes.STRING,
     },
-    end_time: {
-      type: DataTypes.STRING,
-    },
-    logo_url: {
+    closing_time: {
       type: DataTypes.STRING,
     },
     subscription_plans: {
       type: DataTypes.STRING,
       defaultValue: 'free',
     },
-    subscription_ends_at: {
-      type: DataTypes.DATE,
-      defaultValue: `${ DataTypes.NOW + 10 }`,
-    },
     plan_type: {
+      type: DataTypes.STRING,
+    },
+    plan_start_time: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    plan_end_time: {
+      type: DataTypes.DATE,
+    },
+    payment_status: {
       type: DataTypes.STRING,
     },
     features_enabled: {
       type: DataTypes.BOOLEAN,
-    },
-    payment_status: {
-      type: DataTypes.STRING,
     },
     active: {
       type: DataTypes.BOOLEAN,

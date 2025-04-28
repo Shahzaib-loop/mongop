@@ -21,8 +21,11 @@ const trainees = sequelize.define("trainees",
       type: DataTypes.UUID,
       allowNull: false,
     },
-    profileImage: {
+    profile_image: {
       type: DataTypes.STRING,
+    },
+    bio: {
+      type: DataTypes.TEXT,
     },
     first_name: {
       type: DataTypes.STRING,

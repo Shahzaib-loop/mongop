@@ -192,8 +192,6 @@ exports.gymCreate = async (req, res) => {
 
     const owner_ids = gymOwnerData.map(ele => ele.id)
 
-    console.log(owner_ids, "owner_idsowner_idsowner_ids")
-
     // =====>>>>>>> gym creation
     const gymData = await gym.createGym({ ...req.body, owner_ids }, t,)
 
@@ -211,6 +209,7 @@ exports.gymCreate = async (req, res) => {
       gym_id: gymData.id,
       role: 'trainer',
       first_name: name,
+      gender: 'male',
       email,
       phone_number,
       password,

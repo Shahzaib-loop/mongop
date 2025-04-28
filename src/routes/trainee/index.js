@@ -19,7 +19,13 @@ router.post('/updatePhone/:id', trainee.traineeUpdatePhone)
 router.post('/updateEmail/:id', trainee.traineeUpdateEmail)
 router.post('/updatePassword/:id', trainee.traineeUpdatePassword)
 
-router.post('/delete/:id', trainee.traineeDelete)
-router.post('/restore/:id', trainee.traineeRestore)
+router.get('/notes', trainee.traineeUpdatePassword)
+router.get('/notes/:id', trainee.traineeUpdatePassword)
+router.post('/note/create', trainee.traineeUpdatePassword)
+router.post('/note/update/:id', trainee.traineeUpdatePassword)
+router.post('/note/delete/:id', trainee.traineeUpdatePassword)
+
+// router.post('/delete/:id', trainee.traineeDelete)
+// router.post('/restore/:id', trainee.traineeRestore)
 
 module.exports = router
