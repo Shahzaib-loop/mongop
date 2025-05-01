@@ -43,6 +43,7 @@ router.post('/updateTrainee/:id', trainee.traineeUpdate)
 router.post('/updateTraineePhone/:id', trainee.traineeUpdatePhone)
 router.post('/updateTraineeEmail/:id', trainee.traineeUpdateEmail)
 router.post('/updateTraineePassword/:id', trainee.traineeUpdatePassword)
+router.post('/assignTrainer/:id', trainee.traineeUpdateTrainer)
 
 router.post('/deleteTrainee/:id', trainee.traineeDelete)
 router.post('/restoreTrainee/:id', trainee.traineeRestore)

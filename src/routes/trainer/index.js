@@ -10,11 +10,6 @@ router.get('/listen', (req, res, next) => {
   res.json({ title: 'I am Trainer', Message: `I'm listening on ${ process.env.PORT }` })
 })
 
-// create Trainer wala decide krna ha ke siraf gym bna sakta
-// ha ya trainer khud bi register kr sakta ha
-// agr alag register ho sakta ha to FE pr check hoga role ka
-// ni to gym create hoga jo iska
-
 router.post('/login', trainer.trainerLogin)
 router.post('/logout', trainer.trainerLogout)
 

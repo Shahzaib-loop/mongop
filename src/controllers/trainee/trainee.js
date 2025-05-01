@@ -359,6 +359,26 @@ exports.traineeUpdatePassword = async (req, res) => {
   }
 }
 
+exports.traineeUpdateTrainer = async (req, res) => {
+  try {
+    const { id: trainee_id = '' } = req?.params
+    const { trainer_id = '' } = req?.body
+
+    if (!trainee_id && trainer_id) {
+      return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
+    }
+
+    await trainee.updateTrainee(trainee_id, { trainer_id })
+
+    // await addActivity(TraineeActivities, 'trainee_id', trainee_id, "TRAINEE_UPDATED", "trainee's trainer updated")
+
+    responseHandler.success(res, "Trainee's Trainer Updated successfully")
+  }
+  catch (error) {
+    responseHandler.error(res, 500, "Internal Server Error", error.message,)
+  }
+}
+
 exports.traineeDelete = async (req, res) => {
   try {
     const { id = '', } = req?.params
