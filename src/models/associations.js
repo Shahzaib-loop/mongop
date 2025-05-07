@@ -1,3 +1,4 @@
+const db = require('./index');
 const User = require("./unifiedUsers")
 const RefreshToken = require("./refreshTokens")
 const AdminActivities = require("./adminActivities")
@@ -9,12 +10,11 @@ const GymOwner = require("./gymOwners")
 const Gym = require("./gym")
 const Trainer = require("./trainer")
 const Trainee = require("./trainee")
-const TraineeWorkoutPlan = require("./traineeWorkoutPlans")
-const TraineeWorkoutDay = require("./traineeWorkoutDay")
-const TraineeWorkoutExercise = require("./traineeWorkoutExercise")
 const TraineeExerciseProgress = require("./traineeExerciseProgress")
 const TrainerNotes = require("./trainerNotes")
 const TraineeNotes = require("./traineeNotes")
+const TraineeWorkoutPlan = require('./traineeWorkoutPlans')
+const TraineeWorkout = require('./traineeWorkouts')
 
 //  ==== User ============================================================
 Gym.hasOne(User, { foreignKey: 'linked_id', as: 'gym_user', constraints: false, })
@@ -88,8 +88,8 @@ Trainee.belongsTo(Trainer, { foreignKey: 'trainer_id', })
 
 
 //  ==== Workout Exercise ============================================================
-// TraineeWorkoutExercise.hasMany(TraineeExerciseProgress, { foreignKey: 'workout_exercise_id' });
-// TraineeExerciseProgress.belongsTo(TraineeWorkoutExercise, { foreignKey: 'workout_exercise_id' });
+// TraineeWorkoutPlans.hasMany(TraineeExerciseProgress, { foreignKey: 'workout_exercise_id' });
+// TraineeExerciseProgress.belongsTo(TraineeWorkoutPlans, { foreignKey: 'workout_exercise_id' });
 
 
 //  ==== Notes ============================================================

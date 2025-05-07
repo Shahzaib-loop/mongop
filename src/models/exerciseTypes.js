@@ -12,6 +12,12 @@ const exercise_types = sequelize.define("exercise_types", {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    image_url: {
+      type: DataTypes.STRING,
+    },
+    video_url: {
+      type: DataTypes.STRING,
+    },
     deleted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

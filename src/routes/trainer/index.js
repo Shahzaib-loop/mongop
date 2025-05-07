@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const trainer = require('../../controllers/trainer/trainer')
-const traineeWorkout = require('../../controllers/trainer/traineeWorkout')
+const traineeWorkout = require('../../controllers/trainer/traineeWorkouts')
 const trainerNotes = require('../../controllers/trainer/trainerNotes')
 const trainee = require('../../controllers/trainee/trainee')
 
@@ -39,7 +39,7 @@ router.post('/trainee/restore/:id', trainee.traineeRestore)
 
 // ==========>>>> Workouts
 router.get('/workouts/:id', traineeWorkout.traineeWorkoutData)
-router.post('/workouts/create/:trainee_id', traineeWorkout.traineeWorkoutCreate)
+router.post('/workouts/create', traineeWorkout.traineeWorkoutCreate)
 router.post('/workouts/update/:id', traineeWorkout.traineeWorkoutUpdate)
 router.post('/workouts/delete/:id', traineeWorkout.traineeWorkoutDelete)
 

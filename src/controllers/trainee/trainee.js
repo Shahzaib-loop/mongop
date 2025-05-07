@@ -364,7 +364,7 @@ exports.traineeUpdateTrainer = async (req, res) => {
     const { id: trainee_id = '' } = req?.params
     const { trainer_id = '' } = req?.body
 
-    if (!trainee_id && trainer_id) {
+    if (!trainee_id && !trainer_id) {
       return responseHandler.unauthorized(res, "Invalid Data", "data is not correct")
     }
 

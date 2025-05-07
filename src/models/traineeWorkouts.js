@@ -1,31 +1,39 @@
 const { sequelize } = require("../config/db")
 const { DataTypes } = require("sequelize")
 
-const trainee_workout_plans = sequelize.define("trainee_workout_plans", {
+const trainee_workouts = sequelize.define("trainee_workouts", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       primaryKey: true,
     },
-    trainer_id: {
+    // note_id: {
+    //   type: DataTypes.UUID,
+    //   allowNull: false,
+    // },
+    workout_plan_id: {
       type: DataTypes.UUID,
       allowNull: false,
     },
-    trainee_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
-    date: {
+    // exercise_type_id: {
+    //   type: DataTypes.UUID,
+    //   allowNull: false,
+    // },
+    focus_area: {
       type: DataTypes.STRING,
+    },
+    sets: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    name: {
-      type: DataTypes.STRING,
+    reps: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    description: {
-      type: DataTypes.TEXT
+    weight: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     deleted: {
       type: DataTypes.BOOLEAN,
@@ -45,4 +53,4 @@ const trainee_workout_plans = sequelize.define("trainee_workout_plans", {
   }
 )
 
-module.exports = trainee_workout_plans
+module.exports = trainee_workouts
